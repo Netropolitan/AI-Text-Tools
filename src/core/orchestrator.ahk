@@ -45,17 +45,26 @@ class Orchestrator {
     }
 
     /**
-     * Build full system prompt with base instruction
+     * Build full system prompt with base instruction and spelling preference
      * @param {Object} prompt - The prompt object with id and system
      * @returns {string} Full system prompt
      */
     static BuildSystemPrompt(prompt) {
+        ; Get spelling preference from config
+        spellingVariant := this.Config.Get("General", "SpellingVariant", "UK")
+        spellingInstruction := ""
+
+        if spellingVariant = "US"
+            spellingInstruction := "IMPORTANT: Use US English spelling (e.g., color, organize, center, favor, traveled).`n`n"
+        else
+            spellingInstruction := "IMPORTANT: Use UK English spelling (e.g., colour, organise, centre, favour, travelled).`n`n"
+
         ; Ask AI is the only prompt that should allow conversational responses
         if prompt.id = "ask-ai"
-            return prompt.system
+            return spellingInstruction . prompt.system
 
         ; All other prompts get the base transformation instruction prepended
-        return this.BaseInstruction . prompt.system
+        return this.BaseInstruction . spellingInstruction . prompt.system
     }
 
     /**

@@ -4,15 +4,27 @@ All notable changes to AI Text Tools will be documented in this file.
 
 ## [1.3.0] - 2026-01-18
 
+### Added
+- UK/US English spelling toggle in General settings
+- "Run on Windows startup" option in installer and settings
+- "Start minimized to system tray" option
+- Custom tray icon when running from source
+
 ### Changed
 - Fully standalone distribution - no AutoHotkey installation required
 - All executables are self-contained compiled binaries
 - Simplified installer that only uses compiled executables
+- App shows settings when launched manually, runs silently when auto-started
+- Updated Anthropic default model to Claude Sonnet 4
+- Gemini API now uses v1beta endpoint for latest models
 
 ### Fixed
 - Installer "Finish" button showing cancel confirmation
 - Uninstaller errors when closing running instances
 - Application not launching after installation
+- OpenAI API key not connecting (credential storage path issue)
+- Anthropic "model not found" error on first connection
+- Google Gemini not showing latest models
 
 ## [1.2.0] - 2026-01-18
 

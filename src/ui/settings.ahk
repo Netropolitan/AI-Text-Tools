@@ -87,6 +87,16 @@ class SettingsWindow {
         this.Gui.Add("Text", "x20 y" y " c666666", "Set your default provider using the 'Default' checkbox on the Providers or Local tab.")
         y += 35
 
+        ; Language section
+        this.Gui.Add("Text", "x20 y" y " +0x200", "Language")
+        y += 25
+
+        this.Gui.Add("Text", "x20 y" y, "English Spelling:")
+        spellingDropdown := this.Gui.Add("DropDownList", "x150 y" (y-3) " w200 vSpellingVariant", ["UK English", "US English"])
+        currentSpelling := AppConfig.Get("General", "SpellingVariant", "UK")
+        spellingDropdown.Choose(currentSpelling = "US" ? 2 : 1)
+        y += 35
+
         ; Hotkeys section
         this.Gui.Add("Text", "x20 y" y " +0x200", "Hotkeys")  ; 0x200 = SS_CENTERIMAGE (bold-like)
         y += 25
@@ -319,6 +329,10 @@ Use of this software constitutes acceptance of these terms.
         submitted := this.Gui.Submit(false)  ; Don't hide
 
         ; Note: Default provider is now set via checkboxes in Providers/Local tabs
+
+        ; Save spelling variant
+        spellingVariant := submitted.SpellingVariant = "US English" ? "US" : "UK"
+        AppConfig.Set("General", "SpellingVariant", spellingVariant)
 
         ; Save hotkeys and apply immediately
         currentQuickKey := HotkeyManager.CurrentQuickKey || "^+j"

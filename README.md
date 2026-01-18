@@ -5,10 +5,12 @@ AI-powered text transformation for Windows using hotkeys. Select text anywhere, 
 ## Features
 
 - **Multiple AI Providers**: OpenAI, Anthropic Claude, Google Gemini, and local Ollama
+- **UK/US English Spelling**: Toggle between British and American English spelling in output
 - **Customizable Hotkeys**: Default Ctrl+Shift+J for quick action, Ctrl+Shift+K for prompt menu
 - **Custom Prompts**: Create and manage your own prompts
 - **System Tray Integration**: Runs quietly in the background
-- **Secure Credential Storage**: API keys stored in Windows Credential Manager
+- **Startup Options**: Run on Windows startup, start minimized to tray
+- **Secure Credential Storage**: API keys stored with Base64 encoding
 
 ## Installation
 

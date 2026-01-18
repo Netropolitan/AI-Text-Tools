@@ -11,6 +11,11 @@ class TrayManager {
      * Sets up menu items and default action
      */
     static Initialize() {
+        ; Set custom icon (works for both compiled and source)
+        iconPath := A_ScriptDir "\..\assets\icon.ico"
+        if FileExist(iconPath)
+            TraySetIcon(iconPath)
+
         ; Clear default menu
         A_TrayMenu.Delete()
 
