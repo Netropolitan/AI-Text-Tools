@@ -55,8 +55,8 @@ Configure your API keys in the Settings window:
 | Provider | API Key Required | Notes |
 |----------|-----------------|-------|
 | OpenAI | Yes | GPT-4, GPT-4o, GPT-3.5-turbo |
-| Anthropic | Yes | Claude 4.5 Sonnet, Claude 4 Opus/Sonnet/Haiku |
-| Google Gemini | Yes | Gemini 3 Pro, Gemini 3 Flash |
+| Anthropic | Yes | Claude 3.5 Sonnet, Claude 3 Opus/Sonnet/Haiku |
+| Google Gemini | Yes | Gemini 1.5 Pro, Gemini 1.5 Flash |
 | Ollama | No | Local models, requires Ollama installed |
 
 ## Requirements
@@ -90,4 +90,3 @@ Bykov-Brett Enterprises
 ---
 
 Made with support from [Netropolitan Academy](https://netropolitan.xyz)
-

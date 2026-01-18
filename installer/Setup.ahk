@@ -4,7 +4,7 @@
 ; Compiler directives
 ;@Ahk2Exe-SetName AI Text Tools Setup
 ;@Ahk2Exe-SetDescription AI Text Tools Installer
-;@Ahk2Exe-SetVersion 1.2.0
+;@Ahk2Exe-SetVersion 1.3.0
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
 
 ; Check for admin rights and elevate if needed
@@ -368,12 +368,11 @@ StartInstallation() {
         ProgressBar.Value := 30
         Sleep(200)
 
-        ; Copy the main exe
+        ; Copy the main exe (standalone - no AutoHotkey required)
         if FileExist(SourceDir "\AITextTools.exe") {
             FileCopy(SourceDir "\AITextTools.exe", InstallPath "\AITextTools.exe", true)
-        } else if FileExist(SourceDir "\src\main.ahk") {
-            ; Development mode - copy the script
-            FileCopy(SourceDir "\src\main.ahk", InstallPath "\main.ahk", true)
+        } else {
+            throw Error("AITextTools.exe not found in installation package")
         }
 
         ; Step 3: Copy supporting files
@@ -381,24 +380,25 @@ StartInstallation() {
         ProgressBar.Value := 50
         Sleep(200)
 
-        ; Copy settings.default.ini
-        if FileExist(SourceDir "\src\settings.default.ini") {
+        ; Copy settings.default.ini (check multiple locations)
+        if FileExist(SourceDir "\settings.default.ini") {
+            FileCopy(SourceDir "\settings.default.ini", InstallPath "\settings.default.ini", true)
+        } else if FileExist(SourceDir "\src\settings.default.ini") {
             FileCopy(SourceDir "\src\settings.default.ini", InstallPath "\settings.default.ini", true)
         }
 
         ; Copy icon if exists
-        if FileExist(SourceDir "\assets\icon.ico") {
+        if FileExist(SourceDir "\icon.ico") {
+            FileCopy(SourceDir "\icon.ico", InstallPath "\icon.ico", true)
+        } else if FileExist(SourceDir "\assets\icon.ico") {
             FileCopy(SourceDir "\assets\icon.ico", InstallPath "\icon.ico", true)
         }
 
         ; Copy uninstaller
         if FileExist(SourceDir "\Uninstall.exe") {
             FileCopy(SourceDir "\Uninstall.exe", InstallPath "\Uninstall.exe", true)
-        }
-
-        ; Copy src folder for non-compiled version
-        if !FileExist(SourceDir "\AITextTools.exe") && DirExist(SourceDir "\src") {
-            DirCopy(SourceDir "\src", InstallPath "\src", true)
+        } else {
+            throw Error("Uninstall.exe not found in installation package")
         }
 
         ; Step 4: Create shortcuts
@@ -406,9 +406,7 @@ StartInstallation() {
         ProgressBar.Value := 70
         Sleep(200)
 
-        exePath := FileExist(InstallPath "\AITextTools.exe")
-            ? InstallPath "\AITextTools.exe"
-            : InstallPath "\main.ahk"
+        exePath := InstallPath "\AITextTools.exe"
         iconPath := FileExist(InstallPath "\icon.ico") ? InstallPath "\icon.ico" : exePath
 
         if CreateDesktopShortcut {
@@ -437,7 +435,7 @@ StartInstallation() {
         RegWrite(InstallPath "\Uninstall.exe", "REG_SZ", regKey, "UninstallString")
         RegWrite(iconPath, "REG_SZ", regKey, "DisplayIcon")
         RegWrite("Jamie Bykov-Brett", "REG_SZ", regKey, "Publisher")
-        RegWrite("1.2.0", "REG_SZ", regKey, "DisplayVersion")
+        RegWrite("1.3.0", "REG_SZ", regKey, "DisplayVersion")
         RegWrite(InstallPath, "REG_SZ", regKey, "InstallLocation")
 
         ; Step 6: Complete

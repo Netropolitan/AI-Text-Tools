@@ -2,6 +2,18 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.3.0] - 2026-01-18
+
+### Changed
+- Fully standalone distribution - no AutoHotkey installation required
+- All executables are self-contained compiled binaries
+- Simplified installer that only uses compiled executables
+
+### Fixed
+- Installer "Finish" button showing cancel confirmation
+- Uninstaller errors when closing running instances
+- Application not launching after installation
+
 ## [1.2.0] - 2026-01-18
 
 ### Added
