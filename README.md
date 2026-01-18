@@ -65,14 +65,15 @@ Configure your API keys in the Settings window:
 - Internet connection (for cloud providers)
 - [Ollama](https://ollama.ai) (optional, for local models)
 
-## Building from Source
+**Note:** No additional software is required. The application is fully standalone.
 
-Requires [AutoHotkey v2](https://www.autohotkey.com/).
+## For Developers
 
-1. Clone the repository
-2. Run `src/main.ahk` with AutoHotkey v2
+If you want to modify the source code or build from source:
 
-To compile:
+1. Install [AutoHotkey v2](https://www.autohotkey.com/)
+2. Clone the repository
+3. Run `src/main.ahk` with AutoHotkey v2, or compile with:
 ```batch
 scripts\build-all.bat
 ```
