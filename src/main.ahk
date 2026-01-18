@@ -60,14 +60,31 @@ TrayManager.Initialize()
 ; Mark first launch as done
 AppConfig.Set("General", "FirstLaunch", "0")
 
-; Check if should start minimized
+; Check if started from Windows startup (with /startup flag)
+isStartupLaunch := false
+for arg in A_Args {
+    if (arg = "/startup" || arg = "-startup" || arg = "--startup") {
+        isStartupLaunch := true
+        break
+    }
+}
+
+; Check if should start minimized (from settings)
 startMinimized := AppConfig.Get("General", "StartMinimized", "0") = "1"
 
 ; Auto-connect silently if credentials exist
 SetTimer () => AutoConnectProvider(), -500
 
-; Show settings window if not starting minimized
-if !startMinimized {
+; Show settings window:
+; - If launched from startup: respect StartMinimized setting
+; - If launched manually (clicked icon): always show settings
+if isStartupLaunch {
+    ; Launched from Windows startup - respect StartMinimized setting
+    if !startMinimized {
+        SetTimer () => SettingsWindow.Show(), -200
+    }
+} else {
+    ; Launched manually (clicked icon) - always show settings
     SetTimer () => SettingsWindow.Show(), -200
 }
 

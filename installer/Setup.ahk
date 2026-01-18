@@ -25,6 +25,8 @@ global InstallPath := "C:\Program Files\AI Text Tools"
 global CreateDesktopShortcut := true
 global CreateStartMenuShortcut := true
 global LaunchAfterInstall := true
+global RunOnStartup := false
+global StartMinimized := false
 global InstallComplete := false
 
 ; Step controls (will be populated)
@@ -148,16 +150,22 @@ BuildStep3() {
     ctrl := MainGui.Add("Text", "x200 y70 w330 vStep3Desc Hidden", "Choose additional options:")
     Step3Controls.Push(ctrl)
 
-    ctrl := MainGui.Add("Checkbox", "x200 y110 w330 vDesktopShortcut Checked Hidden", "Create desktop shortcut")
+    ctrl := MainGui.Add("Checkbox", "x200 y100 w330 vDesktopShortcut Checked Hidden", "Create desktop shortcut")
     Step3Controls.Push(ctrl)
 
-    ctrl := MainGui.Add("Checkbox", "x200 y140 w330 vStartMenuShortcut Checked Hidden", "Create Start Menu shortcut")
+    ctrl := MainGui.Add("Checkbox", "x200 y125 w330 vStartMenuShortcut Checked Hidden", "Create Start Menu shortcut")
     Step3Controls.Push(ctrl)
 
-    ctrl := MainGui.Add("Checkbox", "x200 y170 w330 vLaunchAfter Checked Hidden", "Launch AI Text Tools after installation")
+    ctrl := MainGui.Add("Checkbox", "x200 y150 w330 vRunOnStartup Hidden", "Run on Windows startup")
     Step3Controls.Push(ctrl)
 
-    ctrl := MainGui.Add("Text", "x200 y220 w330 c666666 vStep3Note Hidden", "You can change these settings later from the application.")
+    ctrl := MainGui.Add("Checkbox", "x200 y175 w330 vStartMinimized Hidden", "Start minimized to system tray")
+    Step3Controls.Push(ctrl)
+
+    ctrl := MainGui.Add("Checkbox", "x200 y200 w330 vLaunchAfter Checked Hidden", "Launch AI Text Tools after installation")
+    Step3Controls.Push(ctrl)
+
+    ctrl := MainGui.Add("Text", "x200 y240 w330 c666666 vStep3Note Hidden", "You can change these settings later from the application.")
     Step3Controls.Push(ctrl)
 }
 
@@ -336,8 +344,11 @@ OnBrowse(ctrl, info) {
 
 SaveOptions() {
     global MainGui, CreateDesktopShortcut, CreateStartMenuShortcut, LaunchAfterInstall
+    global RunOnStartup, StartMinimized
     CreateDesktopShortcut := MainGui["DesktopShortcut"].Value
     CreateStartMenuShortcut := MainGui["StartMenuShortcut"].Value
+    RunOnStartup := MainGui["RunOnStartup"].Value
+    StartMinimized := MainGui["StartMinimized"].Value
     LaunchAfterInstall := MainGui["LaunchAfter"].Value
 }
 
@@ -346,6 +357,7 @@ SaveOptions() {
 StartInstallation() {
     global MainGui, ProgressBar, ProgressText, InstallPath, SourceDir
     global CreateDesktopShortcut, CreateStartMenuShortcut, LaunchAfterInstall
+    global RunOnStartup, StartMinimized
     global InstallComplete
 
     ; Disable buttons during installation
@@ -438,6 +450,27 @@ StartInstallation() {
         RegWrite("1.3.0", "REG_SZ", regKey, "DisplayVersion")
         RegWrite(InstallPath, "REG_SZ", regKey, "InstallLocation")
 
+        ; Apply startup settings
+        ProgressText.Value := "Applying settings..."
+        ProgressBar.Value := 90
+        Sleep(200)
+
+        ; Create AppData settings folder and write settings
+        appDataDir := A_AppData "\AI Text Tools"
+        if !DirExist(appDataDir)
+            DirCreate(appDataDir)
+        settingsFile := appDataDir "\settings.ini"
+
+        ; Write startup settings
+        IniWrite(StartMinimized ? "1" : "0", settingsFile, "General", "StartMinimized")
+        IniWrite("0", settingsFile, "General", "FirstLaunch")
+
+        ; Add to Windows startup if requested (with /startup flag to suppress settings window)
+        if RunOnStartup {
+            startupKey := "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run"
+            RegWrite('"' exePath '" /startup', "REG_SZ", startupKey, "AITextTools")
+        }
+
         ; Step 6: Complete
         ProgressText.Value := "Installation complete!"
         ProgressBar.Value := 100
@@ -454,10 +487,10 @@ StartInstallation() {
         MainGui["CancelBtn"].Text := "Finish"
         MainGui["CancelBtn"].Enabled := true
 
-        ; Launch app if requested
+        ; Launch app if requested (with delay to allow installer to close)
         if LaunchAfterInstall {
-            ; Use explorer.exe to launch as normal user (not admin)
-            try Run('explorer.exe "' exePath '"')
+            ; Use a timer to launch after a short delay
+            SetTimer () => LaunchApp(exePath), -2000
         }
 
     } catch as e {
@@ -470,6 +503,11 @@ StartInstallation() {
 
 OnFinish(ctrl, info) {
     ExitApp
+}
+
+LaunchApp(exePath) {
+    ; Use explorer.exe to launch as normal user (not admin)
+    try Run('explorer.exe "' exePath '"')
 }
 
 CreateShortcut(shortcutPath, targetPath, workingDir, iconPath) {

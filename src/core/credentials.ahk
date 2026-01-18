@@ -5,9 +5,11 @@
  *
  * Simple and reliable approach - stores keys in settings.ini with Base64 encoding.
  * Not cryptographically secure, but prevents casual viewing.
+ * Uses AppData folder for write permissions when installed to Program Files.
  */
 class CredentialManager {
-    static IniFile := A_ScriptDir . "\settings.ini"
+    static AppDataDir := A_AppData . "\AI Text Tools"
+    static IniFile := A_AppData . "\AI Text Tools\settings.ini"
     static Section := "Credentials"
 
     /**
@@ -18,6 +20,10 @@ class CredentialManager {
      */
     static Store(provider, key) {
         try {
+            ; Ensure AppData directory exists
+            if !DirExist(this.AppDataDir)
+                DirCreate(this.AppDataDir)
+
             ; Base64 encode the key
             encoded := this.Base64Encode(key)
             IniWrite(encoded, this.IniFile, this.Section, provider)

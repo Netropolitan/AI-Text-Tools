@@ -92,9 +92,14 @@ class AnthropicProvider extends ProviderBase {
         if apiKey = ""
             return {success: false, error: "API key not configured"}
 
+        ; Use a known valid model for testing (in case config has invalid data)
+        testModel := this.DefaultModel
+        if !testModel || InStr(testModel, "(")
+            testModel := "claude-sonnet-4-20250514"
+
         ; Minimal valid request to test auth
         body := {
-            model: this.DefaultModel,
+            model: testModel,
             max_tokens: 10,
             messages: [{role: "user", content: "Hi"}]
         }

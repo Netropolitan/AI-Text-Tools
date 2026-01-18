@@ -355,7 +355,8 @@ Use of this software constitutes acceptance of these terms.
             exePath := A_ScriptFullPath
             if !A_IsCompiled
                 exePath := A_AhkPath ' "' A_ScriptFullPath '"'
-            RegWrite(exePath, "REG_SZ", key, "AITextTools")
+            ; Add /startup flag so app knows it was auto-started (won't show settings)
+            RegWrite('"' exePath '" /startup', "REG_SZ", key, "AITextTools")
         } else {
             try RegDelete(key, "AITextTools")
         }

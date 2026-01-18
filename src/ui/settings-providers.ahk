@@ -372,8 +372,8 @@ class ProvidersTab {
                     }
                 }
             } else if providerName = "gemini" {
-                ; Fetch Gemini models from API
-                response := HttpClient.Get("https://generativelanguage.googleapis.com/v1/models?key=" . apiKey, Map())
+                ; Fetch Gemini models from API (use v1beta for latest models)
+                response := HttpClient.Get("https://generativelanguage.googleapis.com/v1beta/models?key=" . apiKey, Map())
 
                 if response.status = 200 {
                     data := JSON.Load(response.body)
@@ -510,10 +510,12 @@ class ProvidersTab {
             this.Config.Set(section, "BaseUrl", urlCtrl.Value)
         }
 
-        ; Save model selection
+        ; Save model selection (but not if it's the placeholder text)
         if this.Controls.Has(providerName . "_model") {
             modelCtrl := this.Controls[providerName . "_model"]
-            this.Config.Set(section, "DefaultModel", modelCtrl.Text)
+            modelText := modelCtrl.Text
+            if modelText && !InStr(modelText, "(")  ; Don't save placeholder text
+                this.Config.Set(section, "DefaultModel", modelText)
         }
     }
 
