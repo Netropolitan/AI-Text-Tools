@@ -29,17 +29,20 @@ class ProvidersTab {
 
         ; OpenAI section - models populated from API
         y := this.BuildProviderSection(settingsGui, "OpenAI", "openai", y, {
-            hasApiKey: true
+            hasApiKey: true,
+            apiKeyUrl: "https://platform.openai.com/api-keys"
         })
 
         ; Anthropic section - models populated from API
         y := this.BuildProviderSection(settingsGui, "Anthropic", "anthropic", y, {
-            hasApiKey: true
+            hasApiKey: true,
+            apiKeyUrl: "https://console.anthropic.com/settings/keys"
         })
 
         ; Gemini section - models populated from API
         y := this.BuildProviderSection(settingsGui, "Google Gemini", "gemini", y, {
-            hasApiKey: true
+            hasApiKey: true,
+            apiKeyUrl: "https://aistudio.google.com/apikey"
         })
     }
 
@@ -117,6 +120,12 @@ class ProvidersTab {
         defaultCheck.OnEvent("Click", this.MakeDefaultHandler(providerName))
         this.Controls[providerName . "_default"] := defaultCheck
         this.DefaultCheckboxes[providerName] := defaultCheck
+
+        ; Get API Key link
+        if options.HasOwnProp("apiKeyUrl") && options.apiKeyUrl {
+            apiKeyLink := gui.Add("Text", "x" . (x+210) . " y" . (y+4) . " c0066CC", "Get API Key")
+            apiKeyLink.OnEvent("Click", this.MakeApiKeyLinkHandler(options.apiKeyUrl))
+        }
         y += 38
 
         ; Horizontal separator line
@@ -190,6 +199,13 @@ class ProvidersTab {
      */
     static MakeDefaultHandler(providerName) {
         return (*) => this.SetAsDefault(providerName)
+    }
+
+    /**
+     * Create API key link handler
+     */
+    static MakeApiKeyLinkHandler(url) {
+        return (*) => Run(url)
     }
 
     /**

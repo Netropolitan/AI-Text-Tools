@@ -2,11 +2,13 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
-## [1.4.0] - 2026-01-19
+## [1.4.1] - 2026-01-19
 
 ### Added
 - First launch "install" event sent to analytics (distinct from "startup" events)
 - Windows security warning instructions in README for non-technical users
+- "Get API Key" links for each provider in Models tab
+- Step-by-step API key setup instructions in README for non-technical users
 
 ### Changed
 - Analytics payload now includes app_name field for multi-app tracking support
