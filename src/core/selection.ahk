@@ -92,6 +92,9 @@ class TextSelection {
                 return {success: false, error: "Failed to set clipboard"}
             }
 
+            ; Additional delay to ensure clipboard is fully ready before paste
+            Sleep 500
+
             ; Paste
             Send "^v"
             Sleep this.PostPasteDelay  ; Critical: allow paste to complete (P1)

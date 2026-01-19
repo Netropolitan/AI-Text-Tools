@@ -2,9 +2,25 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.4.0] - 2026-01-19
+
+### Added
+- First launch "install" event sent to analytics (distinct from "startup" events)
+- Windows security warning instructions in README for non-technical users
+
+### Changed
+- Analytics payload now includes app_name field for multi-app tracking support
+- Installer wizard now shows "Bykov-Brett Enterprises" branding
+- About tab tagline changed to "./run the revolution."
+
 ## [1.3.0] - 2026-01-18
 
 ### Added
+- Auto-update system with GitHub release checking
+- Automatic monthly update check (1st of month at 2pm, or next online day)
+- One-click download and install updates from Settings
+- Installer upgrade mode (`/upgrade` flag) for seamless updates
+- Anonymous usage analytics for active user tracking (opt-out available)
 - UK/US English spelling toggle in General settings
 - "Run on Windows startup" option in installer and settings
 - "Start minimized to system tray" option

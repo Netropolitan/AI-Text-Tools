@@ -4,13 +4,32 @@
 ; Compiler directives
 ;@Ahk2Exe-SetName AI Text Tools Setup
 ;@Ahk2Exe-SetDescription AI Text Tools Installer
-;@Ahk2Exe-SetVersion 1.3.0
+;@Ahk2Exe-SetVersion 1.4.0
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
 
-; Check for admin rights and elevate if needed
+; Check for upgrade mode BEFORE admin elevation
+global UpgradeMode := false
+global UpgradePath := ""
+
+for arg in A_Args {
+    if arg = "/upgrade" || arg = "-upgrade" || arg = "--upgrade" {
+        UpgradeMode := true
+    } else if UpgradeMode && UpgradePath = "" && DirExist(arg) {
+        ; Next argument after /upgrade is the install path
+        UpgradePath := arg
+    }
+}
+
+; Check for admin rights and elevate if needed (pass along upgrade args)
 if !A_IsAdmin {
     try {
-        Run('*RunAs "' A_ScriptFullPath '"')
+        cmdLine := '"' A_ScriptFullPath '"'
+        if UpgradeMode {
+            cmdLine .= ' /upgrade'
+            if UpgradePath != ""
+                cmdLine .= ' "' UpgradePath '"'
+        }
+        Run('*RunAs ' cmdLine)
         ExitApp
     } catch {
         MsgBox("This installer requires administrator privileges.`n`nPlease right-click and select 'Run as administrator'.", "Administrator Required", "IconX")
@@ -29,6 +48,16 @@ global RunOnStartup := false
 global StartMinimized := false
 global InstallComplete := false
 
+; If upgrade mode with path, use that path
+if UpgradeMode && UpgradePath != "" {
+    InstallPath := UpgradePath
+} else if UpgradeMode {
+    ; Try to get existing install path from registry
+    try {
+        InstallPath := RegRead("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\AITextTools", "InstallLocation")
+    }
+}
+
 ; Step controls (will be populated)
 global Step1Controls := []
 global Step2Controls := []
@@ -40,7 +69,113 @@ global ProgressText := ""
 ; Source directory (where files to install are located)
 global SourceDir := A_IsCompiled ? A_ScriptDir : A_ScriptDir "\.."
 
-SetupInstaller()
+; Handle upgrade mode or normal setup
+if UpgradeMode {
+    RunUpgrade()
+} else {
+    SetupInstaller()
+}
+
+/**
+ * Run silent upgrade
+ */
+RunUpgrade() {
+    global InstallPath, SourceDir, UpgradeMode, LaunchAfterInstall
+
+    ; Force launch after upgrade
+    LaunchAfterInstall := true
+
+    ; Close running instances
+    CloseRunningInstances()
+
+    ; Create simple progress GUI
+    upgradeGui := Gui("+AlwaysOnTop -MaximizeBox -MinimizeBox -SysMenu", "AI Text Tools Update")
+    upgradeGui.SetFont("s10", "Segoe UI")
+    upgradeGui.BackColor := "FFFFFF"
+
+    upgradeGui.Add("Text", "x20 y20 w360", "Updating AI Text Tools...")
+    progressBar := upgradeGui.Add("Progress", "x20 y50 w360 h25", 0)
+    statusText := upgradeGui.Add("Text", "x20 y85 w360", "Preparing...")
+
+    upgradeGui.Show("w400 h120")
+
+    try {
+        ; Step 1: Close running instances
+        statusText.Value := "Closing running instances..."
+        progressBar.Value := 20
+        Sleep(500)
+
+        ; Step 2: Copy files
+        statusText.Value := "Updating application files..."
+        progressBar.Value := 40
+
+        if !DirExist(InstallPath) {
+            DirCreate(InstallPath)
+        }
+
+        ; Copy main exe
+        if FileExist(SourceDir "\AITextTools.exe") {
+            FileCopy(SourceDir "\AITextTools.exe", InstallPath "\AITextTools.exe", true)
+        }
+
+        progressBar.Value := 60
+
+        ; Copy uninstaller
+        if FileExist(SourceDir "\Uninstall.exe") {
+            FileCopy(SourceDir "\Uninstall.exe", InstallPath "\Uninstall.exe", true)
+        }
+
+        ; Copy icon
+        if FileExist(SourceDir "\assets\icon.ico") {
+            FileCopy(SourceDir "\assets\icon.ico", InstallPath "\icon.ico", true)
+        } else if FileExist(SourceDir "\icon.ico") {
+            FileCopy(SourceDir "\icon.ico", InstallPath "\icon.ico", true)
+        }
+
+        progressBar.Value := 80
+
+        ; Step 3: Update registry version
+        statusText.Value := "Updating registry..."
+        regKey := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\AITextTools"
+        try RegWrite("1.4.0", "REG_SZ", regKey, "DisplayVersion")
+
+        progressBar.Value := 100
+        statusText.Value := "Update complete!"
+        Sleep(1000)
+
+        upgradeGui.Destroy()
+
+        ; Launch app
+        exePath := InstallPath "\AITextTools.exe"
+        if FileExist(exePath) {
+            try Run('explorer.exe "' exePath '"')
+        }
+
+        ExitApp
+
+    } catch as e {
+        upgradeGui.Destroy()
+        MsgBox("Update failed: " e.Message, "Update Error", "IconX")
+        ExitApp
+    }
+}
+
+/**
+ * Close any running instances of AI Text Tools
+ */
+CloseRunningInstances() {
+    ; Try to close gracefully first
+    if WinExist("ahk_exe AITextTools.exe") {
+        try {
+            WinClose("ahk_exe AITextTools.exe")
+            Sleep(1000)
+        }
+    }
+
+    ; Force kill if still running
+    try RunWait('taskkill /F /IM "AITextTools.exe"',, "Hide")
+    Sleep(500)
+}
 
 SetupInstaller() {
     global MainGui, InstallPath
@@ -56,8 +191,10 @@ SetupInstaller() {
     ; Sidebar title
     MainGui.SetFont("Bold s14 cFFFFFF")
     MainGui.Add("Text", "x15 y20 w150 BackgroundTrans", "AI Text Tools")
+    MainGui.SetFont("Bold s9 cFFFFFF")
+    MainGui.Add("Text", "x15 y42 w150 BackgroundTrans", "Bykov-Brett Enterprises")
     MainGui.SetFont("Norm s9 cFFFFFF")
-    MainGui.Add("Text", "x15 y45 w150 BackgroundTrans", "Setup Wizard")
+    MainGui.Add("Text", "x15 y58 w150 BackgroundTrans", "Setup Wizard")
 
     ; Step indicators on sidebar
     MainGui.SetFont("s10 cFFFFFF")
@@ -447,7 +584,7 @@ StartInstallation() {
         RegWrite(InstallPath "\Uninstall.exe", "REG_SZ", regKey, "UninstallString")
         RegWrite(iconPath, "REG_SZ", regKey, "DisplayIcon")
         RegWrite("Jamie Bykov-Brett", "REG_SZ", regKey, "Publisher")
-        RegWrite("1.3.0", "REG_SZ", regKey, "DisplayVersion")
+        RegWrite("1.4.0", "REG_SZ", regKey, "DisplayVersion")
         RegWrite(InstallPath, "REG_SZ", regKey, "InstallLocation")
 
         ; Apply startup settings

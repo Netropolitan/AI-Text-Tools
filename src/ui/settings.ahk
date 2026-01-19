@@ -8,7 +8,7 @@
 class SettingsWindow {
     static Gui := ""
     static Tabs := ""
-    static CurrentVersion := "1.3.0"
+    static CurrentVersion := "1.4.0"
     static GitHubRepo := "https://github.com/Netropolitan/AI-Text-Tools"
 
     /**
@@ -77,11 +77,29 @@ class SettingsWindow {
         this.Gui.Show("w570 h500")
     }
 
+    ; Update UI controls (for updating status after check)
+    static UpdateStatusText := ""
+    static UpdateButton := ""
+    static UpdateAvailable := false
+    static UpdateInstallerPath := ""
+
     /**
      * Build General tab content
      */
     static BuildGeneralTab() {
         y := 40
+
+        ; Version & Updates section
+        this.Gui.Add("Text", "x20 y" y " +0x200", "Version")
+        y += 25
+
+        this.Gui.Add("Text", "x20 y" y, "Current Version:")
+        this.Gui.Add("Text", "x120 y" y, "v" . this.CurrentVersion)
+
+        this.UpdateStatusText := this.Gui.Add("Text", "x200 y" y " w200 c666666", "")
+        this.UpdateButton := this.Gui.Add("Button", "x400 y" (y-4) " w130 h24", "Check for Updates")
+        this.UpdateButton.OnEvent("Click", (*) => this.OnCheckForUpdates())
+        y += 35
 
         ; Info about default provider
         this.Gui.Add("Text", "x20 y" y " c666666", "Set your default provider using the 'Default' checkbox on the Providers or Local tab.")
@@ -127,6 +145,22 @@ class SettingsWindow {
         trayCheck := this.Gui.Add("Checkbox", "x20 y" y " vStartMinimized", "Start minimized to system tray")
         if AppConfig.Get("General", "StartMinimized", "0") = "1"
             trayCheck.Value := 1
+        y += 30
+
+        ; Updates & Analytics section
+        this.Gui.Add("Text", "x20 y" y " +0x200", "Updates && Analytics")
+        y += 25
+
+        ; Auto-check for updates
+        autoUpdateCheck := this.Gui.Add("Checkbox", "x20 y" y " vAutoCheckUpdates", "Automatically check for updates (monthly)")
+        if AppConfig.Get("Updates", "AutoCheck", "1") = "1"
+            autoUpdateCheck.Value := 1
+        y += 25
+
+        ; Anonymous analytics
+        analyticsCheck := this.Gui.Add("Checkbox", "x20 y" y " vAnalyticsEnabled", "Help improve AI Text Tools (anonymous usage data)")
+        if AppConfig.Get("Updates", "Analytics", "1") = "1"
+            analyticsCheck.Value := 1
     }
 
     /**
@@ -189,7 +223,7 @@ class SettingsWindow {
         this.Gui.SetFont("Norm")
         y += 22
 
-        this.Gui.Add("Text", "x" x " y" y " c666666", "./Run The Revolution")
+        this.Gui.Add("Text", "x" x " y" y " c666666", "./run the revolution.")
         y += 20
 
         netroLink := this.Gui.Add("Text", "x" x " y" y " c0066CC", "netropolitan.xyz")
@@ -309,16 +343,102 @@ Use of this software constitutes acceptance of these terms.
     }
 
     /**
-     * Check for updates from GitHub
+     * Check for updates from GitHub (legacy - opens releases page)
      */
     static CheckForUpdates() {
         try {
-            ; Open GitHub releases page
             Run this.GitHubRepo "/releases"
             MsgBox("Opening GitHub releases page.`n`nCheck if a newer version than v" this.CurrentVersion " is available.", "Check for Updates", "Iconi")
         } catch as e {
             MsgBox("Could not open GitHub page.`n`nVisit: " this.GitHubRepo, "Check for Updates", "IconX")
         }
+    }
+
+    /**
+     * Handle Check for Updates button click
+     */
+    static OnCheckForUpdates() {
+        ; Update UI to show checking
+        this.UpdateStatusText.Value := "Checking..."
+        this.UpdateButton.Enabled := false
+
+        ; Run check in background to avoid blocking UI
+        SetTimer(() => this.DoUpdateCheck(), -1)
+    }
+
+    /**
+     * Perform actual update check
+     */
+    static DoUpdateCheck() {
+        result := UpdateManager.CheckForUpdates()
+
+        if result.error != "" {
+            ; Handle "no releases" case gracefully (not an error)
+            if InStr(result.error, "No releases") {
+                this.UpdateStatusText.Value := "No releases yet"
+                this.UpdateStatusText.SetFont("c666666")
+                this.UpdateButton.Text := "Check for Updates"
+                this.UpdateButton.Enabled := true
+                return
+            }
+
+            this.UpdateStatusText.Value := "Check failed"
+            this.UpdateButton.Text := "Retry"
+            this.UpdateButton.Enabled := true
+            MsgBox("Could not check for updates:`n`n" . result.error, "Update Check", "Icon!")
+            return
+        }
+
+        if result.available {
+            this.UpdateAvailable := true
+            this.UpdateStatusText.Value := "Update available: v" . result.version
+            this.UpdateStatusText.SetFont("cGreen")
+            this.UpdateButton.Text := "Download && Install"
+            this.UpdateButton.OnEvent("Click", (*) => this.OnDownloadUpdate(), -1)  ; Remove old handler
+            this.UpdateButton.OnEvent("Click", (*) => this.OnDownloadUpdate())
+        } else {
+            this.UpdateStatusText.Value := "Up to date"
+            this.UpdateStatusText.SetFont("c666666")
+            this.UpdateButton.Text := "Check for Updates"
+        }
+
+        this.UpdateButton.Enabled := true
+    }
+
+    /**
+     * Handle Download & Install button click
+     */
+    static OnDownloadUpdate() {
+        if !this.UpdateAvailable {
+            this.OnCheckForUpdates()
+            return
+        }
+
+        ; Confirm with user
+        result := MsgBox("Download and install AI Text Tools v" . UpdateManager.LatestVersion . "?`n`nThe application will close and the installer will run.", "Update Available", "YesNo Iconi")
+
+        if result != "Yes"
+            return
+
+        ; Update UI
+        this.UpdateStatusText.Value := "Downloading..."
+        this.UpdateButton.Enabled := false
+
+        ; Download
+        downloadResult := UpdateManager.DownloadUpdate()
+
+        if !downloadResult.success {
+            this.UpdateStatusText.Value := "Download failed"
+            this.UpdateButton.Enabled := true
+            MsgBox("Download failed:`n`n" . downloadResult.error, "Update Error", "IconX")
+            return
+        }
+
+        this.UpdateInstallerPath := downloadResult.path
+        this.UpdateStatusText.Value := "Installing..."
+
+        ; Launch installer and exit
+        UpdateManager.InstallUpdate(downloadResult.path)
     }
 
     /**
@@ -347,6 +467,10 @@ Use of this software constitutes acceptance of these terms.
         ; Handle startup options
         this.SetStartupEnabled(submitted.RunOnStartup)
         AppConfig.Set("General", "StartMinimized", submitted.StartMinimized ? "1" : "0")
+
+        ; Save update and analytics settings
+        AppConfig.Set("Updates", "AutoCheck", submitted.AutoCheckUpdates ? "1" : "0")
+        AppConfig.Set("Updates", "Analytics", submitted.AnalyticsEnabled ? "1" : "0")
 
         ; Save provider settings (API keys to CredentialManager, models to INI)
         ProvidersTab.SaveAll()

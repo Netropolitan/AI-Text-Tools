@@ -2,6 +2,8 @@
 
 AI-powered text transformation for Windows using hotkeys. Select text anywhere, press a hotkey, and transform it using AI.
 
+![AI Text Tools Demo](https://25517737.fs1.hubspotusercontent-eu1.net/hubfs/25517737/AI-Text-Tools.gif)
+
 ## Features
 
 - **Multiple AI Providers**: OpenAI, Anthropic Claude, Google Gemini, and local Ollama
@@ -19,6 +21,17 @@ AI-powered text transformation for Windows using hotkeys. Select text anywhere, 
 1. Download `AITextTools-Setup.exe` from the [Releases](https://github.com/Netropolitan/AI-Text-Tools/releases) page
 2. Run the installer
 3. Follow the setup wizard
+
+### Windows Security Warning
+
+When you run the installer, Windows may show a security warning saying "Windows protected your PC" or "Unknown publisher". This is normal for new software that hasn't been submitted to Microsoft for verification.
+
+**To continue with the installation:**
+
+1. Click **"More info"** (the text link, not a button)
+2. Click **"Run anyway"**
+
+The application is safe to use. This warning appears because the software is independently developed and code-signing certificates are expensive.
 
 ### Manual Install
 
@@ -93,4 +106,3 @@ Bykov-Brett Enterprises
 ---
 
 Made with support from [Netropolitan Academy](https://netropolitan.xyz)
-

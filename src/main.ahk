@@ -7,7 +7,7 @@ DllCall("SetThreadDpiAwarenessContext", "ptr", -4, "ptr")
 ; Compiler directives for EXE
 ;@Ahk2Exe-SetName AI Text Tools
 ;@Ahk2Exe-SetDescription AI-powered text transformation
-;@Ahk2Exe-SetVersion 1.3.0
+;@Ahk2Exe-SetVersion 1.4.0
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
 ;@Ahk2Exe-SetCompanyName Bykov-Brett Enterprises
 
@@ -21,6 +21,7 @@ DllCall("SetThreadDpiAwarenessContext", "ptr", -4, "ptr")
 #Include core\custom-prompts.ahk
 #Include core\credentials.ahk
 #Include core\orchestrator.ahk
+#Include core\updater.ahk
 
 ; Providers
 #Include providers\base.ahk
@@ -56,6 +57,12 @@ HotkeyManager.Initialize(OnQuickAction, OnPromptMenu, AppConfig)
 
 ; Initialize system tray
 TrayManager.Initialize()
+
+; Check if this is the first launch (for install analytics)
+isFirstLaunch := AppConfig.Get("General", "FirstLaunch", "1") = "1"
+
+; Initialize automatic update checking and analytics
+UpdateManager.InitializeAutoCheck(AppConfig, isFirstLaunch)
 
 ; Mark first launch as done
 AppConfig.Set("General", "FirstLaunch", "0")
