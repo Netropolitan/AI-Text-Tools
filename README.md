@@ -101,6 +101,18 @@ Each AI provider requires you to create an account and get an API key. Here's ho
 | Google Gemini | Yes | Gemini 3 Pro, Gemini 3 Flash |
 | Ollama | No | Local models, requires Ollama installed |
 
+### Recommended Models
+
+For everyday text tasks, these models offer the best balance of speed, quality, and cost:
+
+| Provider | Recommended Model | Why |
+|----------|------------------|-----|
+| OpenAI | GPT-4.1 nano | Fast and very affordable |
+| Anthropic | Claude Haiku 4.5 | Quick responses, low cost |
+| Google Gemini | Gemini 2.5 Flash-Lite | Free tier available, fast |
+
+These lightweight models are ideal for grammar fixes, rewrites, and quick text improvements. You can always switch to more powerful models for complex tasks.
+
 ## Requirements
 
 - Windows 10 or later
