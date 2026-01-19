@@ -254,6 +254,10 @@ class UpdateManager {
      * @returns {int} 1 if v1 > v2, -1 if v1 < v2, 0 if equal
      */
     static CompareVersions(v1, v2) {
+        ; Strip any non-numeric suffixes (e.g., "-beta", "-rc1")
+        v1 := RegExReplace(v1, "-.*$", "")
+        v2 := RegExReplace(v2, "-.*$", "")
+
         parts1 := StrSplit(v1, ".")
         parts2 := StrSplit(v2, ".")
 
@@ -265,14 +269,27 @@ class UpdateManager {
 
         ; Compare each part
         Loop 3 {
-            n1 := Integer(parts1[A_Index])
-            n2 := Integer(parts2[A_Index])
+            ; Extract only numeric portion from each part
+            n1 := this.ParseVersionPart(parts1[A_Index])
+            n2 := this.ParseVersionPart(parts2[A_Index])
             if n1 > n2
                 return 1
             if n1 < n2
                 return -1
         }
 
+        return 0
+    }
+
+    /**
+     * Parse a version part, extracting only the numeric portion
+     * @param {string} part - Version part (e.g., "1", "4", "1-beta")
+     * @returns {int} Numeric value, or 0 if not parseable
+     */
+    static ParseVersionPart(part) {
+        ; Extract leading digits only
+        if RegExMatch(part, "^(\d+)", &match)
+            return Integer(match[1])
         return 0
     }
 
