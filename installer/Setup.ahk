@@ -4,12 +4,12 @@
 ; Compiler directives
 ;@Ahk2Exe-SetName AI Text Tools Setup
 ;@Ahk2Exe-SetDescription AI Text Tools Installer
-;@Ahk2Exe-SetVersion 1.4.10
+;@Ahk2Exe-SetVersion 1.5.0
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
 
 ; GitHub repository for downloading update files
 global GitHubRepo := "Netropolitan/AI-Text-Tools"
-global CurrentInstallerVersion := "1.4.10"
+global CurrentInstallerVersion := "1.5.0"
 
 /**
  * Download file with proper redirect handling using WinHTTP
@@ -757,7 +757,8 @@ StartInstallation() {
 
         ; Write startup settings
         IniWrite(StartMinimized ? "1" : "0", settingsFile, "General", "StartMinimized")
-        IniWrite("0", settingsFile, "General", "FirstLaunch")
+        ; Note: Don't set FirstLaunch here - let it default to "1" so the app
+        ; can detect first launch and send "install" analytics event
 
         ; Add to Windows startup if requested (with /startup flag to suppress settings window)
         if RunOnStartup {

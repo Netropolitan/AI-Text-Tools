@@ -2,6 +2,16 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.5.0] - 2026-01-19
+
+### Fixed
+- Installer no longer incorrectly sets FirstLaunch=0 (was preventing "install" analytics event)
+- Updater now uses WinHTTP with redirect handling for reliable GitHub downloads
+
+### Improved
+- Download mechanism in updater.ahk now matches installer's robust implementation
+- Uses ADODB.Stream for binary file handling (fixes COM SafeArray issues)
+
 ## [1.4.10] - 2026-01-19
 
 ### Fixed

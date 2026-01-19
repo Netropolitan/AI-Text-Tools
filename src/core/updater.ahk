@@ -11,7 +11,7 @@
 class UpdateManager {
     static GitHubRepo := "Netropolitan/AI-Text-Tools"
     static GitHubAPI := "https://api.github.com/repos/" . UpdateManager.GitHubRepo . "/releases/latest"
-    static CurrentVersion := "1.4.10"
+    static CurrentVersion := "1.5.0"
 
     ; Analytics endpoint - Set to empty string "" to disable analytics
     static AnalyticsEndpoint := "https://brew.taila07ff3.ts.net/api/ping"
@@ -301,6 +301,45 @@ class UpdateManager {
     }
 
     /**
+     * Download file with proper redirect handling using WinHTTP and ADODB.Stream
+     * @param {string} url - URL to download
+     * @param {string} savePath - Local path to save file
+     */
+    static DownloadWithRedirect(url, savePath) {
+        whr := ComObject("WinHttp.WinHttpRequest.5.1")
+        whr.Open("GET", url, true)
+        whr.SetRequestHeader("User-Agent", "AI-Text-Tools/" . this.CurrentVersion)
+        whr.SetTimeouts(30000, 30000, 30000, 60000)
+        whr.Send()
+        whr.WaitForResponse(60)
+
+        ; Check for redirect (GitHub returns 302)
+        if whr.Status = 302 || whr.Status = 301 {
+            redirectUrl := whr.GetResponseHeader("Location")
+            if redirectUrl {
+                whr := ComObject("WinHttp.WinHttpRequest.5.1")
+                whr.Open("GET", redirectUrl, true)
+                whr.SetRequestHeader("User-Agent", "AI-Text-Tools/" . this.CurrentVersion)
+                whr.SetTimeouts(30000, 30000, 30000, 60000)
+                whr.Send()
+                whr.WaitForResponse(60)
+            }
+        }
+
+        if whr.Status != 200 {
+            throw Error("HTTP " . whr.Status)
+        }
+
+        ; Save binary response using ADODB.Stream
+        stream := ComObject("ADODB.Stream")
+        stream.Type := 1  ; adTypeBinary
+        stream.Open()
+        stream.Write(whr.ResponseBody)
+        stream.SaveToFile(savePath, 2)  ; adSaveCreateOverWrite
+        stream.Close()
+    }
+
+    /**
      * Download update to temp folder
      * @param {Function} progressCallback - Optional callback(percent, status)
      * @returns {Object} {success: bool, path: string, error: string}
@@ -325,8 +364,8 @@ class UpdateManager {
             if progressCallback
                 progressCallback(0, "Connecting...")
 
-            ; Download file
-            Download(this.DownloadUrl, tempPath)
+            ; Download file with proper redirect handling
+            this.DownloadWithRedirect(this.DownloadUrl, tempPath)
 
             if progressCallback
                 progressCallback(100, "Download complete")
