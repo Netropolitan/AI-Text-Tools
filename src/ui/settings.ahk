@@ -8,7 +8,7 @@
 class SettingsWindow {
     static Gui := ""
     static Tabs := ""
-    static CurrentVersion := "1.4.6"
+    static CurrentVersion := "1.4.7"
     static GitHubRepo := "https://github.com/Netropolitan/AI-Text-Tools"
 
     /**
@@ -318,25 +318,58 @@ class SettingsWindow {
 
         disclaimerText := "
         (
-This software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement.
+TERMS OF USE AND DISCLAIMER
 
-In no event shall the authors, developers, or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
+Last updated: January 2026
 
-By using this software, you acknowledge and agree that:
+By using AI Text Tools ("the Software"), you agree to be bound by these terms. If you do not agree, do not use the Software.
 
-1. AI-generated content may contain errors, inaccuracies, or inappropriate material. You are responsible for reviewing and verifying all output before use.
+1. SOFTWARE PROVIDED "AS IS"
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH YOU.
 
-2. The developers are not responsible for any decisions made or actions taken based on AI-generated content.
+2. LIMITATION OF LIABILITY
+IN NO EVENT SHALL THE AUTHORS, DEVELOPERS, COPYRIGHT HOLDERS, OR BYKOV-BRETT ENTERPRISES BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-3. You will not use this software for any unlawful, harmful, or malicious purposes.
+3. AI-GENERATED CONTENT
+a) AI output may contain errors, inaccuracies, biases, or inappropriate material
+b) You are solely responsible for reviewing, verifying, and editing all AI-generated content before use
+c) The developers make no representations about the accuracy, reliability, or suitability of AI output
+d) You assume all risk for any decisions or actions based on AI-generated content
 
-4. API keys and credentials are stored locally on your device. You are responsible for keeping them secure.
+4. DATA AND PRIVACY
+a) API keys and credentials are stored locally on your device using Base64 encoding
+b) You are responsible for keeping your API keys secure
+c) Text you process is sent to your chosen AI provider (OpenAI, Anthropic, Google, or Ollama)
+d) Each AI provider has their own privacy policy and terms of service
+e) Anonymous usage analytics may be collected (can be disabled in Settings)
+f) We do not store, access, or have visibility into the content you process
 
-5. Third-party AI services (OpenAI, Anthropic, Google, Ollama) have their own terms of service which you must comply with.
+5. ACCEPTABLE USE
+You agree NOT to use this Software to:
+a) Generate content that is illegal, harmful, threatening, abusive, or harassing
+b) Create content that infringes on intellectual property rights
+c) Produce spam, malware, or deceptive content
+d) Violate any applicable laws or regulations
+e) Circumvent the terms of service of any AI provider
 
-6. The software connects to external AI services. Data sent to these services is subject to their privacy policies.
+6. THIRD-PARTY SERVICES
+a) This Software requires third-party AI services to function
+b) You must comply with the terms of service of any AI provider you use
+c) We are not responsible for the availability, pricing, or policies of third-party services
+d) Changes to third-party APIs may affect Software functionality
 
-Use of this software constitutes acceptance of these terms.
+7. INDEMNIFICATION
+You agree to indemnify and hold harmless the developers, Bykov-Brett Enterprises, and their affiliates from any claims, damages, or expenses arising from your use of the Software or violation of these terms.
+
+8. MODIFICATIONS
+We reserve the right to modify these terms at any time. Continued use of the Software constitutes acceptance of modified terms.
+
+9. GOVERNING LAW
+These terms shall be governed by the laws of the United Kingdom.
+
+© 2026 Bykov-Brett Enterprises. All rights reserved.
+
+By using this Software, you acknowledge that you have read, understood, and agree to be bound by these terms.
         )"
 
         this.Gui.Add("Edit", "x" x " y" y " w510 h340 ReadOnly Multi", disclaimerText)

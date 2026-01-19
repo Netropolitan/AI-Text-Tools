@@ -2,6 +2,13 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.4.7] - 2026-01-19
+
+### Added
+- License agreement in installer - must accept terms before proceeding
+- Comprehensive Terms of Use and Disclaimer in application Settings
+- Covers liability limitations, AI content warnings, data privacy, acceptable use
+
 ## [1.4.6] - 2026-01-19
 
 ### Fixed

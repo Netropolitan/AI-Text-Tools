@@ -4,12 +4,12 @@
 ; Compiler directives
 ;@Ahk2Exe-SetName AI Text Tools Setup
 ;@Ahk2Exe-SetDescription AI Text Tools Installer
-;@Ahk2Exe-SetVersion 1.4.6
+;@Ahk2Exe-SetVersion 1.4.7
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
 
 ; GitHub repository for downloading update files
 global GitHubRepo := "Netropolitan/AI-Text-Tools"
-global CurrentInstallerVersion := "1.4.6"
+global CurrentInstallerVersion := "1.4.7"
 
 ; Check for upgrade mode BEFORE admin elevation
 global UpgradeMode := false
@@ -188,7 +188,7 @@ RunUpgrade() {
         ; Step 3: Update registry version
         statusText.Value := "Updating registry..."
         regKey := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\AITextTools"
-        try RegWrite("1.4.6", "REG_SZ", regKey, "DisplayVersion")
+        try RegWrite("1.4.7", "REG_SZ", regKey, "DisplayVersion")
 
         progressBar.Value := 100
         statusText.Value := "Update complete!"
@@ -277,6 +277,9 @@ SetupInstaller() {
     ; Disable back button on first step
     MainGui["BackBtn"].Enabled := false
 
+    ; Disable next button until license is accepted
+    MainGui["NextBtn"].Enabled := false
+
     ; Event handlers
     MainGui.OnEvent("Close", OnGuiClose)
     MainGui.OnEvent("Escape", OnGuiClose)
@@ -290,17 +293,60 @@ SetupInstaller() {
 BuildStep1() {
     global MainGui, Step1Controls
 
-    ; Welcome step
+    ; Welcome step with License Agreement
     MainGui.SetFont("Bold s14")
     ctrl := MainGui.Add("Text", "x200 y30 w330 vStep1Title", "Welcome to AI Text Tools")
     Step1Controls.Push(ctrl)
     MainGui.SetFont("Norm s10")
 
-    ctrl := MainGui.Add("Text", "x200 y70 w330 vStep1Desc", "This wizard will install AI Text Tools on your computer.`n`nAI Text Tools provides AI-powered text transformation using hotkeys. Select text anywhere and press a hotkey to transform it using AI.`n`nFeatures:`n- Multiple AI providers (OpenAI, Anthropic, Gemini, Ollama)`n- Customizable hotkeys`n- Custom prompts`n- System tray integration")
+    ctrl := MainGui.Add("Text", "x200 y60 w330 vStep1Desc", "This wizard will install AI Text Tools on your computer.`n`nPlease read and accept the license agreement:")
     Step1Controls.Push(ctrl)
 
-    ctrl := MainGui.Add("Text", "x200 y280 w330 vStep1Footer", "Click Next to continue.")
+    ; License agreement text box
+    licenseText := "
+    (
+LICENSE AGREEMENT
+
+By installing and using AI Text Tools, you agree to the following terms:
+
+1. SOFTWARE PROVIDED "AS IS"
+This software is provided without warranty of any kind. The developers are not liable for any damages arising from its use.
+
+2. AI-GENERATED CONTENT
+AI output may contain errors or inappropriate content. You are solely responsible for reviewing and verifying all AI-generated text before use.
+
+3. DATA & PRIVACY
+- API keys are stored locally on your device
+- Text you process is sent to your chosen AI provider
+- Each AI provider has their own privacy policy
+
+4. ACCEPTABLE USE
+You agree not to use this software for unlawful, harmful, or malicious purposes.
+
+5. THIRD-PARTY SERVICES
+You must comply with the terms of service of any AI provider you use (OpenAI, Anthropic, Google, etc.).
+
+6. NO LIABILITY
+The developers shall not be held liable for any decisions, actions, or consequences resulting from use of this software or AI-generated content.
+
+© 2026 Bykov-Brett Enterprises. All rights reserved.
+    )"
+    ctrl := MainGui.Add("Edit", "x200 y115 w330 h175 vStep1License Hidden ReadOnly Multi", licenseText)
     Step1Controls.Push(ctrl)
+
+    ; Accept checkbox
+    ctrl := MainGui.Add("Checkbox", "x200 y300 w330 vAcceptLicense Hidden", "I accept the license agreement")
+    ctrl.OnEvent("Click", OnAcceptLicense)
+    Step1Controls.Push(ctrl)
+
+    ctrl := MainGui.Add("Text", "x200 y325 w330 vStep1Footer Hidden c666666", "You must accept the license agreement to continue.")
+    Step1Controls.Push(ctrl)
+}
+
+OnAcceptLicense(*) {
+    global MainGui
+    ; Enable/disable Next button based on checkbox
+    MainGui["NextBtn"].Enabled := MainGui["AcceptLicense"].Value
 }
 
 BuildStep2() {
@@ -514,7 +560,13 @@ UpdateStep() {
 
     ; Update button states
     MainGui["BackBtn"].Enabled := (CurrentStep > 1 && CurrentStep < 4)
-    MainGui["NextBtn"].Enabled := (CurrentStep < 4)
+
+    ; Next button - check license acceptance on step 1
+    if CurrentStep = 1 {
+        MainGui["NextBtn"].Enabled := MainGui["AcceptLicense"].Value
+    } else {
+        MainGui["NextBtn"].Enabled := (CurrentStep < 4)
+    }
 
     if CurrentStep = 3
         MainGui["NextBtn"].Text := "Install"
@@ -635,7 +687,7 @@ StartInstallation() {
         RegWrite(InstallPath "\Uninstall.exe", "REG_SZ", regKey, "UninstallString")
         RegWrite(iconPath, "REG_SZ", regKey, "DisplayIcon")
         RegWrite("Jamie Bykov-Brett", "REG_SZ", regKey, "Publisher")
-        RegWrite("1.4.6", "REG_SZ", regKey, "DisplayVersion")
+        RegWrite("1.4.7", "REG_SZ", regKey, "DisplayVersion")
         RegWrite(InstallPath, "REG_SZ", regKey, "InstallLocation")
 
         ; Apply startup settings
