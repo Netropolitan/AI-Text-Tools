@@ -4,12 +4,12 @@
 ; Compiler directives
 ;@Ahk2Exe-SetName AI Text Tools Setup
 ;@Ahk2Exe-SetDescription AI Text Tools Installer
-;@Ahk2Exe-SetVersion 1.4.8
+;@Ahk2Exe-SetVersion 1.4.9
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
 
 ; GitHub repository for downloading update files
 global GitHubRepo := "Netropolitan/AI-Text-Tools"
-global CurrentInstallerVersion := "1.4.8"
+global CurrentInstallerVersion := "1.4.9"
 
 /**
  * Download file with proper redirect handling using WinHTTP
@@ -237,13 +237,16 @@ RunUpgrade() {
         ; Step 3: Update registry version
         statusText.Value := "Updating registry..."
         regKey := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\AITextTools"
-        try RegWrite("1.4.8", "REG_SZ", regKey, "DisplayVersion")
+        try RegWrite(CurrentInstallerVersion, "REG_SZ", regKey, "DisplayVersion")
 
         progressBar.Value := 100
         statusText.Value := "Update complete!"
-        Sleep(1000)
+        Sleep(500)
 
         upgradeGui.Destroy()
+
+        ; Show success message
+        MsgBox("AI Text Tools has been updated to v" . CurrentInstallerVersion . " successfully!`n`nThe application will now launch.", "Update Complete", "Iconi")
 
         ; Launch app
         exePath := InstallPath "\AITextTools.exe"
@@ -255,7 +258,7 @@ RunUpgrade() {
 
     } catch as e {
         upgradeGui.Destroy()
-        MsgBox("Update failed: " e.Message, "Update Error", "IconX")
+        MsgBox("Update failed (v" . CurrentInstallerVersion . "):`n`n" . e.Message . "`n`nPlease try downloading manually from GitHub.", "Update Error", "IconX")
         ExitApp
     }
 }
@@ -736,7 +739,7 @@ StartInstallation() {
         RegWrite(InstallPath "\Uninstall.exe", "REG_SZ", regKey, "UninstallString")
         RegWrite(iconPath, "REG_SZ", regKey, "DisplayIcon")
         RegWrite("Jamie Bykov-Brett", "REG_SZ", regKey, "Publisher")
-        RegWrite("1.4.8", "REG_SZ", regKey, "DisplayVersion")
+        RegWrite(CurrentInstallerVersion, "REG_SZ", regKey, "DisplayVersion")
         RegWrite(InstallPath, "REG_SZ", regKey, "InstallLocation")
 
         ; Apply startup settings

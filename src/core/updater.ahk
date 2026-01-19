@@ -11,7 +11,7 @@
 class UpdateManager {
     static GitHubRepo := "Netropolitan/AI-Text-Tools"
     static GitHubAPI := "https://api.github.com/repos/" . UpdateManager.GitHubRepo . "/releases/latest"
-    static CurrentVersion := "1.4.8"
+    static CurrentVersion := "1.4.9"
 
     ; Analytics endpoint - Set to empty string "" to disable analytics
     static AnalyticsEndpoint := "https://brew.taila07ff3.ts.net/api/ping"
@@ -352,7 +352,7 @@ class UpdateManager {
      * Offer to open releases page for manual download
      */
     static OfferManualDownload(reason) {
-        result := MsgBox(reason . "`n`nWould you like to open the GitHub releases page to download manually?", "Download Failed", "YesNo Icon!")
+        result := MsgBox(reason . "`n`nCurrent version: v" . this.CurrentVersion . "`nTarget version: v" . this.LatestVersion . "`n`nWould you like to open the GitHub releases page to download manually?", "Download Failed", "YesNo Icon!")
         if result = "Yes"
             this.OpenReleasesPage()
         return {success: false, path: "", error: reason}
@@ -364,7 +364,7 @@ class UpdateManager {
      */
     static InstallUpdate(installerPath) {
         if !FileExist(installerPath) {
-            MsgBox("Installer not found at: " . installerPath, "Update Error", "IconX")
+            MsgBox("Installer not found at: " . installerPath . "`n`nCurrent version: v" . this.CurrentVersion, "Update Error", "IconX")
             return
         }
 
@@ -385,7 +385,7 @@ class UpdateManager {
             ; Exit current application
             ExitApp
         } catch as e {
-            MsgBox("Failed to launch installer: " . e.Message, "Update Error", "IconX")
+            MsgBox("Failed to launch installer: " . e.Message . "`n`nCurrent version: v" . this.CurrentVersion, "Update Error", "IconX")
         }
     }
 

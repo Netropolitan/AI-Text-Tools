@@ -2,6 +2,13 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.4.9] - 2026-01-19
+
+### Improved
+- Update success confirmation message shows version number after successful upgrade
+- Version info included in error messages for easier troubleshooting
+- Fixed registry version to use variable instead of hardcoded value
+
 ## [1.4.8] - 2026-01-19
 
 ### Fixed
