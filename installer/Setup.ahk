@@ -4,12 +4,47 @@
 ; Compiler directives
 ;@Ahk2Exe-SetName AI Text Tools Setup
 ;@Ahk2Exe-SetDescription AI Text Tools Installer
-;@Ahk2Exe-SetVersion 1.4.7
+;@Ahk2Exe-SetVersion 1.4.8
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
 
 ; GitHub repository for downloading update files
 global GitHubRepo := "Netropolitan/AI-Text-Tools"
-global CurrentInstallerVersion := "1.4.7"
+global CurrentInstallerVersion := "1.4.8"
+
+/**
+ * Download file with proper redirect handling using WinHTTP
+ */
+DownloadWithRedirect(url, savePath) {
+    whr := ComObject("WinHttp.WinHttpRequest.5.1")
+    whr.Open("GET", url, true)
+    whr.SetRequestHeader("User-Agent", "AI-Text-Tools-Updater/" . CurrentInstallerVersion)
+    whr.SetTimeouts(30000, 30000, 30000, 60000)  ; 60 second receive timeout
+    whr.Send()
+    whr.WaitForResponse(60)
+
+    ; Check for redirect (GitHub returns 302)
+    if whr.Status = 302 || whr.Status = 301 {
+        redirectUrl := whr.GetResponseHeader("Location")
+        if redirectUrl {
+            whr := ComObject("WinHttp.WinHttpRequest.5.1")
+            whr.Open("GET", redirectUrl, true)
+            whr.SetRequestHeader("User-Agent", "AI-Text-Tools-Updater/" . CurrentInstallerVersion)
+            whr.SetTimeouts(30000, 30000, 30000, 60000)
+            whr.Send()
+            whr.WaitForResponse(60)
+        }
+    }
+
+    if whr.Status != 200 {
+        throw Error("HTTP " . whr.Status)
+    }
+
+    ; Save binary response to file
+    arr := whr.ResponseBody
+    file := FileOpen(savePath, "w")
+    file.RawWrite(arr)
+    file.Close()
+}
 
 ; Check for upgrade mode BEFORE admin elevation
 global UpgradeMode := false
@@ -130,34 +165,48 @@ RunUpgrade() {
         if needsDownload {
             ; Download files from GitHub release
             statusText.Value := "Downloading application files..."
-            tag := "v" . CurrentInstallerVersion
-            baseUrl := "https://github.com/" . GitHubRepo . "/releases/download/" . tag . "/"
 
-            ; Download main exe
+            ; Try both tag formats (v1.4.8 and 1.4.8)
             downloadPath := InstallPath "\AITextTools.exe"
-            try {
-                Download(baseUrl . "AITextTools.exe", downloadPath)
-            } catch as e {
-                throw Error("Failed to download AITextTools.exe: " . e.Message)
+            downloaded := false
+            lastError := ""
+
+            for tag in ["v" . CurrentInstallerVersion, CurrentInstallerVersion] {
+                baseUrl := "https://github.com/" . GitHubRepo . "/releases/download/" . tag . "/"
+                downloadUrl := baseUrl . "AITextTools.exe"
+
+                statusText.Value := "Trying " . tag . "..."
+
+                try {
+                    ; Use WinHTTP for better redirect handling
+                    DownloadWithRedirect(downloadUrl, downloadPath)
+
+                    ; Validate downloaded file
+                    if FileExist(downloadPath) {
+                        fileSize := FileGetSize(downloadPath)
+                        if fileSize > 500000 {
+                            downloaded := true
+                            break
+                        } else {
+                            FileDelete(downloadPath)
+                            lastError := "File too small (" . Round(fileSize/1024) . " KB) from " . tag
+                        }
+                    }
+                } catch as e {
+                    lastError := e.Message . " (tag: " . tag . ")"
+                }
             }
 
-            ; Validate downloaded file (should be > 1MB for a compiled AHK exe)
-            if !FileExist(downloadPath) {
-                throw Error("Download failed - file was not created")
-            }
-            fileSize := FileGetSize(downloadPath)
-            if fileSize < 500000 {
-                ; File too small - probably an error page
-                FileDelete(downloadPath)
-                throw Error("Download failed - file appears invalid (only " . Round(fileSize/1024) . " KB). The release may not have AITextTools.exe uploaded yet.")
+            if !downloaded {
+                throw Error("Download failed: " . lastError . "`n`nPlease download manually from GitHub releases.")
             }
 
             progressBar.Value := 55
 
-            ; Download uninstaller
+            ; Download uninstaller (try same tag that worked)
             statusText.Value := "Downloading uninstaller..."
             try {
-                Download(baseUrl . "Uninstall.exe", InstallPath "\Uninstall.exe")
+                DownloadWithRedirect(baseUrl . "Uninstall.exe", InstallPath "\Uninstall.exe")
             } catch as e {
                 ; Non-fatal - continue without uninstaller update
             }
@@ -188,7 +237,7 @@ RunUpgrade() {
         ; Step 3: Update registry version
         statusText.Value := "Updating registry..."
         regKey := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\AITextTools"
-        try RegWrite("1.4.7", "REG_SZ", regKey, "DisplayVersion")
+        try RegWrite("1.4.8", "REG_SZ", regKey, "DisplayVersion")
 
         progressBar.Value := 100
         statusText.Value := "Update complete!"
@@ -687,7 +736,7 @@ StartInstallation() {
         RegWrite(InstallPath "\Uninstall.exe", "REG_SZ", regKey, "UninstallString")
         RegWrite(iconPath, "REG_SZ", regKey, "DisplayIcon")
         RegWrite("Jamie Bykov-Brett", "REG_SZ", regKey, "Publisher")
-        RegWrite("1.4.7", "REG_SZ", regKey, "DisplayVersion")
+        RegWrite("1.4.8", "REG_SZ", regKey, "DisplayVersion")
         RegWrite(InstallPath, "REG_SZ", regKey, "InstallLocation")
 
         ; Apply startup settings

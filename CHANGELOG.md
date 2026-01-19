@@ -2,6 +2,13 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.4.8] - 2026-01-19
+
+### Fixed
+- Installer now uses WinHTTP with proper redirect handling for GitHub downloads
+- Tries both tag formats (v1.4.8 and 1.4.8) when downloading updates
+- Better error messages showing which URL was attempted
+
 ## [1.4.7] - 2026-01-19
 
 ### Added

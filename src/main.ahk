@@ -7,7 +7,7 @@ DllCall("SetThreadDpiAwarenessContext", "ptr", -4, "ptr")
 ; Compiler directives for EXE
 ;@Ahk2Exe-SetName AI Text Tools
 ;@Ahk2Exe-SetDescription AI-powered text transformation
-;@Ahk2Exe-SetVersion 1.4.7
+;@Ahk2Exe-SetVersion 1.4.8
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
 ;@Ahk2Exe-SetCompanyName Bykov-Brett Enterprises
 
