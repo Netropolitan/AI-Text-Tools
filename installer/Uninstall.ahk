@@ -4,7 +4,7 @@
 ; Compiler directives
 ;@Ahk2Exe-SetName AI Text Tools Uninstaller
 ;@Ahk2Exe-SetDescription AI Text Tools Uninstaller
-;@Ahk2Exe-SetVersion 1.3.0
+;@Ahk2Exe-SetVersion 1.5.2
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
 
 ; Check for admin rights and elevate if needed

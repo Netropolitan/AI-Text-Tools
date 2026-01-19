@@ -2,7 +2,7 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
-## [1.5.0] - 2026-01-19
+## [1.5.2] - 2026-01-19
 
 ### Fixed
 - Installer no longer incorrectly sets FirstLaunch=0 (was preventing "install" analytics event)
