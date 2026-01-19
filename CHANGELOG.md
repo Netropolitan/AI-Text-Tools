@@ -2,6 +2,11 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.4.3] - 2026-01-19
+
+### Fixed
+- Download update now offers to open releases page if no installer is attached to the release
+
 ## [1.4.2] - 2026-01-19
 
 ### Added

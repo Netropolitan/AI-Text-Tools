@@ -11,7 +11,7 @@
 class UpdateManager {
     static GitHubRepo := "Netropolitan/AI-Text-Tools"
     static GitHubAPI := "https://api.github.com/repos/" . UpdateManager.GitHubRepo . "/releases/latest"
-    static CurrentVersion := "1.4.2"
+    static CurrentVersion := "1.4.3"
 
     ; Analytics endpoint - Set to empty string "" to disable analytics
     static AnalyticsEndpoint := "https://brew.taila07ff3.ts.net/api/ping"
@@ -249,7 +249,7 @@ class UpdateManager {
 
     /**
      * Compare two version strings
-     * @param {string} v1 - First version (e.g., "1.4.2")
+     * @param {string} v1 - First version (e.g., "1.4.3")
      * @param {string} v2 - Second version (e.g., "1.3.0")
      * @returns {int} 1 if v1 > v2, -1 if v1 < v2, 0 if equal
      */
@@ -300,7 +300,11 @@ class UpdateManager {
      */
     static DownloadUpdate(progressCallback := "") {
         if this.DownloadUrl = "" {
-            return {success: false, path: "", error: "No download URL available"}
+            ; No installer file attached to release - offer to open releases page
+            result := MsgBox("The update doesn't have an installer file attached yet.`n`nWould you like to open the GitHub releases page to download manually?", "Download Not Available", "YesNo Icon!")
+            if result = "Yes"
+                this.OpenReleasesPage()
+            return {success: false, path: "", error: "No installer attached to this release"}
         }
 
         try {

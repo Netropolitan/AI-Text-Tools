@@ -4,7 +4,7 @@
 ; Compiler directives
 ;@Ahk2Exe-SetName AI Text Tools Setup
 ;@Ahk2Exe-SetDescription AI Text Tools Installer
-;@Ahk2Exe-SetVersion 1.4.2
+;@Ahk2Exe-SetVersion 1.4.3
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
 
 ; Check for upgrade mode BEFORE admin elevation
@@ -137,7 +137,7 @@ RunUpgrade() {
         ; Step 3: Update registry version
         statusText.Value := "Updating registry..."
         regKey := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\AITextTools"
-        try RegWrite("1.4.2", "REG_SZ", regKey, "DisplayVersion")
+        try RegWrite("1.4.3", "REG_SZ", regKey, "DisplayVersion")
 
         progressBar.Value := 100
         statusText.Value := "Update complete!"
@@ -584,7 +584,7 @@ StartInstallation() {
         RegWrite(InstallPath "\Uninstall.exe", "REG_SZ", regKey, "UninstallString")
         RegWrite(iconPath, "REG_SZ", regKey, "DisplayIcon")
         RegWrite("Jamie Bykov-Brett", "REG_SZ", regKey, "Publisher")
-        RegWrite("1.4.2", "REG_SZ", regKey, "DisplayVersion")
+        RegWrite("1.4.3", "REG_SZ", regKey, "DisplayVersion")
         RegWrite(InstallPath, "REG_SZ", regKey, "InstallLocation")
 
         ; Apply startup settings
