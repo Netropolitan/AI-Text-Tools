@@ -2,6 +2,11 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.4.10] - 2026-01-19
+
+### Fixed
+- Fixed binary download using ADODB.Stream instead of RawWrite (ComObjArray has no "Size" property error)
+
 ## [1.4.9] - 2026-01-19
 
 ### Improved

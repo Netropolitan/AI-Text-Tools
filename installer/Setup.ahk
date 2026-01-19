@@ -4,12 +4,12 @@
 ; Compiler directives
 ;@Ahk2Exe-SetName AI Text Tools Setup
 ;@Ahk2Exe-SetDescription AI Text Tools Installer
-;@Ahk2Exe-SetVersion 1.4.9
+;@Ahk2Exe-SetVersion 1.4.10
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
 
 ; GitHub repository for downloading update files
 global GitHubRepo := "Netropolitan/AI-Text-Tools"
-global CurrentInstallerVersion := "1.4.9"
+global CurrentInstallerVersion := "1.4.10"
 
 /**
  * Download file with proper redirect handling using WinHTTP
@@ -39,11 +39,13 @@ DownloadWithRedirect(url, savePath) {
         throw Error("HTTP " . whr.Status)
     }
 
-    ; Save binary response to file
-    arr := whr.ResponseBody
-    file := FileOpen(savePath, "w")
-    file.RawWrite(arr)
-    file.Close()
+    ; Save binary response using ADODB.Stream (proper way to handle COM SafeArray)
+    stream := ComObject("ADODB.Stream")
+    stream.Type := 1  ; adTypeBinary
+    stream.Open()
+    stream.Write(whr.ResponseBody)
+    stream.SaveToFile(savePath, 2)  ; adSaveCreateOverWrite
+    stream.Close()
 }
 
 ; Check for upgrade mode BEFORE admin elevation

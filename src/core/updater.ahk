@@ -11,7 +11,7 @@
 class UpdateManager {
     static GitHubRepo := "Netropolitan/AI-Text-Tools"
     static GitHubAPI := "https://api.github.com/repos/" . UpdateManager.GitHubRepo . "/releases/latest"
-    static CurrentVersion := "1.4.9"
+    static CurrentVersion := "1.4.10"
 
     ; Analytics endpoint - Set to empty string "" to disable analytics
     static AnalyticsEndpoint := "https://brew.taila07ff3.ts.net/api/ping"
