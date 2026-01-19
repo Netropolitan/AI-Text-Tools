@@ -4,12 +4,12 @@
 ; Compiler directives
 ;@Ahk2Exe-SetName AI Text Tools Setup
 ;@Ahk2Exe-SetDescription AI Text Tools Installer
-;@Ahk2Exe-SetVersion 1.4.5
+;@Ahk2Exe-SetVersion 1.4.6
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
 
 ; GitHub repository for downloading update files
 global GitHubRepo := "Netropolitan/AI-Text-Tools"
-global CurrentInstallerVersion := "1.4.5"
+global CurrentInstallerVersion := "1.4.6"
 
 ; Check for upgrade mode BEFORE admin elevation
 global UpgradeMode := false
@@ -107,7 +107,14 @@ RunUpgrade() {
         ; Step 1: Close running instances
         statusText.Value := "Closing running instances..."
         progressBar.Value := 20
-        Sleep(500)
+
+        ; Kill any running instances of the app
+        try {
+            RunWait('taskkill /F /IM AITextTools.exe', , "Hide")
+        } catch {
+            ; Ignore errors - process might not be running
+        }
+        Sleep(1000)  ; Give time for process to fully close
 
         ; Step 2: Copy or download files
         statusText.Value := "Updating application files..."
@@ -127,10 +134,22 @@ RunUpgrade() {
             baseUrl := "https://github.com/" . GitHubRepo . "/releases/download/" . tag . "/"
 
             ; Download main exe
+            downloadPath := InstallPath "\AITextTools.exe"
             try {
-                Download(baseUrl . "AITextTools.exe", InstallPath "\AITextTools.exe")
+                Download(baseUrl . "AITextTools.exe", downloadPath)
             } catch as e {
                 throw Error("Failed to download AITextTools.exe: " . e.Message)
+            }
+
+            ; Validate downloaded file (should be > 1MB for a compiled AHK exe)
+            if !FileExist(downloadPath) {
+                throw Error("Download failed - file was not created")
+            }
+            fileSize := FileGetSize(downloadPath)
+            if fileSize < 500000 {
+                ; File too small - probably an error page
+                FileDelete(downloadPath)
+                throw Error("Download failed - file appears invalid (only " . Round(fileSize/1024) . " KB). The release may not have AITextTools.exe uploaded yet.")
             }
 
             progressBar.Value := 55
@@ -169,7 +188,7 @@ RunUpgrade() {
         ; Step 3: Update registry version
         statusText.Value := "Updating registry..."
         regKey := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\AITextTools"
-        try RegWrite("1.4.5", "REG_SZ", regKey, "DisplayVersion")
+        try RegWrite("1.4.6", "REG_SZ", regKey, "DisplayVersion")
 
         progressBar.Value := 100
         statusText.Value := "Update complete!"
@@ -616,7 +635,7 @@ StartInstallation() {
         RegWrite(InstallPath "\Uninstall.exe", "REG_SZ", regKey, "UninstallString")
         RegWrite(iconPath, "REG_SZ", regKey, "DisplayIcon")
         RegWrite("Jamie Bykov-Brett", "REG_SZ", regKey, "Publisher")
-        RegWrite("1.4.5", "REG_SZ", regKey, "DisplayVersion")
+        RegWrite("1.4.6", "REG_SZ", regKey, "DisplayVersion")
         RegWrite(InstallPath, "REG_SZ", regKey, "InstallLocation")
 
         ; Apply startup settings

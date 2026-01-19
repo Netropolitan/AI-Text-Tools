@@ -2,6 +2,13 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.4.6] - 2026-01-19
+
+### Fixed
+- Installer now forcefully closes running instances before upgrading (using taskkill)
+- Added validation for downloaded files - checks size > 500KB to catch HTML error pages
+- Better error messages when download fails or file is invalid
+
 ## [1.4.5] - 2026-01-19
 
 ### Fixed
