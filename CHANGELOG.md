@@ -2,6 +2,12 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.4.2] - 2026-01-19
+
+### Added
+- "All Models" button in Models tab to refresh available models from provider
+- Allows easy switching to newer models when older ones become outdated
+
 ## [1.4.1] - 2026-01-19
 
 ### Added

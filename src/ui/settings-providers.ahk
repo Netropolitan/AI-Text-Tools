@@ -112,10 +112,14 @@ class ProvidersTab {
         testBtn := gui.Add("Button", "x" . x . " y" . y . " w110 h26", "Test Connection")
         testBtn.OnEvent("Click", this.MakeTestHandler(providerName))
 
+        ; See All Models button (refresh model list)
+        modelsBtn := gui.Add("Button", "x" . (x+120) . " y" . y . " w95 h26", "All Models")
+        modelsBtn.OnEvent("Click", this.MakeModelsHandler(providerName))
+
         ; Default checkbox
         currentDefault := this.Config.Get("General", "DefaultProvider", "openai")
         isDefault := (providerName = currentDefault)
-        defaultCheck := gui.Add("Checkbox", "x" . (x+130) . " y" . (y+4), "Default")
+        defaultCheck := gui.Add("Checkbox", "x" . (x+230) . " y" . (y+4), "Default")
         defaultCheck.Value := isDefault
         defaultCheck.OnEvent("Click", this.MakeDefaultHandler(providerName))
         this.Controls[providerName . "_default"] := defaultCheck
@@ -123,7 +127,7 @@ class ProvidersTab {
 
         ; Get API Key link
         if options.HasOwnProp("apiKeyUrl") && options.apiKeyUrl {
-            apiKeyLink := gui.Add("Text", "x" . (x+210) . " y" . (y+4) . " c0066CC", "Get API Key")
+            apiKeyLink := gui.Add("Text", "x" . (x+310) . " y" . (y+4) . " c0066CC", "Get API Key")
             apiKeyLink.OnEvent("Click", this.MakeApiKeyLinkHandler(options.apiKeyUrl))
         }
         y += 38
@@ -206,6 +210,27 @@ class ProvidersTab {
      */
     static MakeApiKeyLinkHandler(url) {
         return (*) => Run(url)
+    }
+
+    /**
+     * Create models refresh handler
+     */
+    static MakeModelsHandler(providerName) {
+        return (*) => this.RefreshModels(providerName)
+    }
+
+    /**
+     * Refresh models list for a provider
+     */
+    static RefreshModels(providerName) {
+        ; Check if API key exists
+        if !CredentialManager.Exists(providerName) {
+            MsgBox("Please enter an API key and click 'Test Connection' first.", "No API Key", "Icon!")
+            return
+        }
+
+        ; Fetch models
+        this.FetchModels(providerName)
     }
 
     /**
