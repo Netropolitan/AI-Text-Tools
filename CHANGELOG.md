@@ -2,6 +2,13 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.4.4] - 2026-01-19
+
+### Improved
+- Updater now constructs direct download URL as fallback when release assets aren't listed
+- Download failures now offer to open releases page for manual download
+- Validates downloaded file size to catch failed/empty downloads
+
 ## [1.4.3] - 2026-01-19
 
 ### Fixed
