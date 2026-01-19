@@ -2,6 +2,13 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.4.5] - 2026-01-19
+
+### Fixed
+- **Critical:** Installer now downloads application files from GitHub when upgrading
+- Previously, upgrades failed silently because Setup.exe was alone in temp folder
+- Installer detects if running from download location and fetches AITextTools.exe and Uninstall.exe from the matching GitHub release
+
 ## [1.4.4] - 2026-01-19
 
 ### Improved

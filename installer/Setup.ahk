@@ -4,8 +4,12 @@
 ; Compiler directives
 ;@Ahk2Exe-SetName AI Text Tools Setup
 ;@Ahk2Exe-SetDescription AI Text Tools Installer
-;@Ahk2Exe-SetVersion 1.4.4
+;@Ahk2Exe-SetVersion 1.4.5
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
+
+; GitHub repository for downloading update files
+global GitHubRepo := "Netropolitan/AI-Text-Tools"
+global CurrentInstallerVersion := "1.4.5"
 
 ; Check for upgrade mode BEFORE admin elevation
 global UpgradeMode := false
@@ -105,7 +109,7 @@ RunUpgrade() {
         progressBar.Value := 20
         Sleep(500)
 
-        ; Step 2: Copy files
+        ; Step 2: Copy or download files
         statusText.Value := "Updating application files..."
         progressBar.Value := 40
 
@@ -113,19 +117,47 @@ RunUpgrade() {
             DirCreate(InstallPath)
         }
 
-        ; Copy main exe
-        if FileExist(SourceDir "\AITextTools.exe") {
-            FileCopy(SourceDir "\AITextTools.exe", InstallPath "\AITextTools.exe", true)
+        ; Determine if we need to download from GitHub (running from temp/download location)
+        needsDownload := !FileExist(SourceDir "\AITextTools.exe")
+
+        if needsDownload {
+            ; Download files from GitHub release
+            statusText.Value := "Downloading application files..."
+            tag := "v" . CurrentInstallerVersion
+            baseUrl := "https://github.com/" . GitHubRepo . "/releases/download/" . tag . "/"
+
+            ; Download main exe
+            try {
+                Download(baseUrl . "AITextTools.exe", InstallPath "\AITextTools.exe")
+            } catch as e {
+                throw Error("Failed to download AITextTools.exe: " . e.Message)
+            }
+
+            progressBar.Value := 55
+
+            ; Download uninstaller
+            statusText.Value := "Downloading uninstaller..."
+            try {
+                Download(baseUrl . "Uninstall.exe", InstallPath "\Uninstall.exe")
+            } catch as e {
+                ; Non-fatal - continue without uninstaller update
+            }
+        } else {
+            ; Copy from local source (normal install or local upgrade)
+            if FileExist(SourceDir "\AITextTools.exe") {
+                FileCopy(SourceDir "\AITextTools.exe", InstallPath "\AITextTools.exe", true)
+            }
+
+            progressBar.Value := 55
+
+            if FileExist(SourceDir "\Uninstall.exe") {
+                FileCopy(SourceDir "\Uninstall.exe", InstallPath "\Uninstall.exe", true)
+            }
         }
 
-        progressBar.Value := 60
+        progressBar.Value := 70
 
-        ; Copy uninstaller
-        if FileExist(SourceDir "\Uninstall.exe") {
-            FileCopy(SourceDir "\Uninstall.exe", InstallPath "\Uninstall.exe", true)
-        }
-
-        ; Copy icon
+        ; Copy icon (try local first, then skip if not available - icon is embedded in exe)
         if FileExist(SourceDir "\assets\icon.ico") {
             FileCopy(SourceDir "\assets\icon.ico", InstallPath "\icon.ico", true)
         } else if FileExist(SourceDir "\icon.ico") {
@@ -137,7 +169,7 @@ RunUpgrade() {
         ; Step 3: Update registry version
         statusText.Value := "Updating registry..."
         regKey := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\AITextTools"
-        try RegWrite("1.4.4", "REG_SZ", regKey, "DisplayVersion")
+        try RegWrite("1.4.5", "REG_SZ", regKey, "DisplayVersion")
 
         progressBar.Value := 100
         statusText.Value := "Update complete!"
@@ -584,7 +616,7 @@ StartInstallation() {
         RegWrite(InstallPath "\Uninstall.exe", "REG_SZ", regKey, "UninstallString")
         RegWrite(iconPath, "REG_SZ", regKey, "DisplayIcon")
         RegWrite("Jamie Bykov-Brett", "REG_SZ", regKey, "Publisher")
-        RegWrite("1.4.4", "REG_SZ", regKey, "DisplayVersion")
+        RegWrite("1.4.5", "REG_SZ", regKey, "DisplayVersion")
         RegWrite(InstallPath, "REG_SZ", regKey, "InstallLocation")
 
         ; Apply startup settings
