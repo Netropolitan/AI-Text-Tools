@@ -49,12 +49,24 @@ The application is safe to use. This warning appears because the software is ind
 
 ### Built-in Prompts
 
-- Fix Grammar
-- Improve Writing
-- Make Professional
-- Simplify
-- Summarize
-- Translate to English
+**Writing:**
+- Fix spelling & grammar
+- Rewrite for clarity
+- Make shorter / Make longer
+- Make professional
+- Simplify language
+- Humanify language
+
+**Analysis:**
+- Proofread (detailed)
+- Summarise
+- Explain
+- Find action items
+
+**Other:**
+- Continue writing
+- Convert to/from legalese
+- Optimise code
 - Ask AI (custom question)
 
 ## Configuration
@@ -138,6 +150,8 @@ scripts\build-all.bat
 ## Credits
 
 - [ecornell/ai-tools-ahk](https://github.com/ecornell/ai-tools-ahk) - Original AHK AI tools inspiration
+- [Serenity](https://autohotkey.com/board/topic/32608-changing-the-system-cursor/) - System cursor modification
+- [iseahound](https://github.com/iseahound/SetSystemCursor) - SetSystemCursor implementation
 
 ## License
 

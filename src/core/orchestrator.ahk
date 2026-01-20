@@ -329,46 +329,38 @@ class Orchestrator {
         }
     }
 
-    ; Cursor state
-    static CursorTimer := ""
-    static WaitCursor := 0
-
     /**
-     * Show wait cursor (with timer to maintain it)
+     * Show animated wait cursor during AI processing
      */
     static ShowSpinner(message := "") {
-        ; Load wait cursor once
-        this.WaitCursor := DllCall("LoadCursor", "Ptr", 0, "Ptr", 32514, "Ptr")  ; IDC_WAIT = 32514
+        ; Try animated cursor first, fall back to system wait cursor
+        try {
+            ; Look for animated cursor in assets folder
+            if A_IsCompiled {
+                cursorPath := A_ScriptDir "\assets\wait-1.ani"
+            } else {
+                cursorPath := A_ScriptDir "\..\assets\wait-1.ani"
+            }
 
-        ; Set cursor immediately
-        DllCall("SetCursor", "Ptr", this.WaitCursor, "Ptr")
-
-        ; Start timer to keep cursor as wait (Windows resets it on mouse move)
-        this.CursorTimer := ObjBindMethod(this, "MaintainWaitCursor")
-        SetTimer this.CursorTimer, 50
+            if FileExist(cursorPath) {
+                SetSystemCursor(cursorPath)
+            } else {
+                ; Fall back to system wait cursor
+                SetSystemCursor("Wait")
+            }
+        } catch {
+            ; If all else fails, use system wait cursor
+            try SetSystemCursor("Wait")
+        }
     }
 
     /**
-     * Maintain wait cursor during processing
-     */
-    static MaintainWaitCursor() {
-        if this.WaitCursor
-            DllCall("SetCursor", "Ptr", this.WaitCursor, "Ptr")
-    }
-
-    /**
-     * Restore normal cursor
+     * Restore normal cursor after processing
      */
     static HideSpinner() {
-        ; Stop cursor timer
-        if this.CursorTimer {
-            SetTimer this.CursorTimer, 0
-            this.CursorTimer := ""
+        try {
+            RestoreCursor()
         }
-        this.WaitCursor := 0
-
-        ; Restore arrow cursor
-        DllCall("SetCursor", "Ptr", DllCall("LoadCursor", "Ptr", 0, "Ptr", 32512, "Ptr"), "Ptr")  ; IDC_ARROW = 32512
     }
 
     /**

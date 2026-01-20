@@ -2,6 +2,20 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.5.3] - 2026-01-19
+
+### Added
+- Animated wait cursor during AI processing for visual feedback
+- Wait cursor animation files (wait-1.ani, wait-2.ani)
+
+### Fixed
+- Menu now appears on the correct monitor in multi-monitor setups
+- README updated to reflect actual prompts (removed non-existent "Translate to English")
+- README installation instructions clarified - users need to download full ZIP, not just setup file
+
+### Improved
+- Added credits for cursor script contributors (Serenity, iseahound)
+
 ## [1.5.2] - 2026-01-19
 
 ### Fixed

@@ -118,8 +118,18 @@ class PromptMenu {
         posX := mouseX + 10
         posY := mouseY - 50
 
-        ; Get screen dimensions
-        MonitorGetWorkArea(MonitorGetPrimary(), &workL, &workT, &workR, &workB)
+        ; Find monitor containing the mouse cursor
+        monitorNum := 1
+        Loop MonitorGetCount() {
+            MonitorGet(A_Index, &mLeft, &mTop, &mRight, &mBottom)
+            if (mouseX >= mLeft && mouseX < mRight && mouseY >= mTop && mouseY < mBottom) {
+                monitorNum := A_Index
+                break
+            }
+        }
+
+        ; Get work area for the correct monitor
+        MonitorGetWorkArea(monitorNum, &workL, &workT, &workR, &workB)
 
         ; Adjust if would go off edges
         if (posX + width > workR)
@@ -528,7 +538,17 @@ class PromptMenu {
         height := y + 10
         width := 205
 
-        MonitorGetWorkArea(MonitorGetPrimary(), &workL, &workT, &workR, &workB)
+        ; Find monitor containing the mouse cursor
+        monitorNum := 1
+        Loop MonitorGetCount() {
+            MonitorGet(A_Index, &mLeft, &mTop, &mRight, &mBottom)
+            if (mouseX >= mLeft && mouseX < mRight && mouseY >= mTop && mouseY < mBottom) {
+                monitorNum := A_Index
+                break
+            }
+        }
+
+        MonitorGetWorkArea(monitorNum, &workL, &workT, &workR, &workB)
         posX := mouseX + 10
         posY := mouseY - 50
         if (posX + width > workR)
