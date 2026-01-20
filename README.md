@@ -18,9 +18,12 @@ AI-powered text transformation for Windows using hotkeys. Select text anywhere, 
 
 ### Quick Install (Recommended)
 
-1. Download `AITextTools-Setup.exe` from the [Releases](https://github.com/Netropolitan/AI-Text-Tools/releases) page
-2. Run the installer
-3. Follow the setup wizard
+1. Download the [full release ZIP](https://github.com/Netropolitan/AI-Text-Tools/archive/refs/heads/main.zip)
+2. Extract all files to a folder
+3. Run `AITextTools-Setup.exe` from the extracted folder
+4. Follow the setup wizard
+
+**Important:** The installer needs all three files (`AITextTools.exe`, `AITextTools-Setup.exe`, and `Uninstall.exe`) to be in the same folder. Don't download just the setup file on its own.
 
 ### Windows Security Warning
 
