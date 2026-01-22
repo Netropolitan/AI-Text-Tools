@@ -42,6 +42,10 @@ The application is safe to use. This warning appears because the software is ind
 2. Run `AITextTools.exe`
 3. Configure your API keys in the settings
 
+## Video Demo
+
+[![AI Text Tools Demo](https://img.youtube.com/vi/bYSQ_B3JLjU/0.jpg)](https://youtube.com/shorts/bYSQ_B3JLjU)
+
 ## Usage
 
 1. **Quick Action (Ctrl+Shift+J)**: Select text and press the hotkey to apply your default prompt
