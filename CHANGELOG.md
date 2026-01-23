@@ -2,6 +2,19 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.5.4] - 2026-01-23
+
+### Added
+- Recommended models auto-selected when API key is provided:
+  - OpenAI: gpt-4.1-nano
+  - Anthropic: claude-haiku-4-5-20251001
+  - Google Gemini: gemini-2.5-flash
+- Recommended models marked with ★ symbol in dropdown for easy identification
+- Models sorted with recommended model at top of list
+
+### Improved
+- README updated with actual model IDs and auto-selection documentation
+
 ## [1.5.3] - 2026-01-19
 
 ### Added

@@ -18,6 +18,13 @@ class ProvidersTab {
     static Config := ""
     static DefaultCheckboxes := Map()  ; Track all default checkboxes for mutual exclusion
 
+    ; Recommended models for each provider (best balance of speed, quality, cost)
+    static RecommendedModels := Map(
+        "openai", "gpt-4.1-nano",
+        "anthropic", "claude-haiku-4-5-20251001",
+        "gemini", "gemini-2.5-flash"
+    )
+
     /**
      * Build Providers tab content
      * @param settingsGui The parent Gui object
@@ -103,7 +110,7 @@ class ProvidersTab {
 
         ; Create dropdown with just the saved model (if any) or placeholder
         initialModels := currentModel ? [currentModel] : ["(Test connection to load)"]
-        modelCtrl := gui.Add("DropDownList", "x" . (x+80) . " y" . (y-3) . " w200", initialModels)
+        modelCtrl := gui.Add("DropDownList", "x" . (x+80) . " y" . (y-3) . " w300", initialModels)
         modelCtrl.Choose(1)
         this.Controls[providerName . "_model"] := modelCtrl
         y += 30
@@ -436,11 +443,29 @@ class ProvidersTab {
             modelCtrl.Delete()
 
             if models.Length > 0 {
-                ; Sort models
-                models := this.SortModels(models)
-                modelCtrl.Add(models)
+                ; Sort models with recommended first
+                models := this.SortModels(models, providerName)
 
-                ; Re-select current model if it exists, otherwise select first
+                ; Get recommended model for this provider
+                recommendedModel := this.RecommendedModels.Has(providerName) ? this.RecommendedModels[providerName] : ""
+                recommendedIndex := 0
+
+                ; Add models to dropdown, marking recommended with ★
+                displayModels := []
+                for i, model in models {
+                    if model = recommendedModel {
+                        displayModels.Push(model . " ★ Recommended")
+                        recommendedIndex := i
+                    } else {
+                        displayModels.Push(model)
+                    }
+                }
+                modelCtrl.Add(displayModels)
+
+                ; Selection priority:
+                ; 1. Current saved model (if it exists in list)
+                ; 2. Recommended model (auto-select for new users)
+                ; 3. First model in list
                 foundIndex := 0
                 for i, m in models {
                     if m = currentModel {
@@ -448,13 +473,24 @@ class ProvidersTab {
                         break
                     }
                 }
-                if foundIndex > 0
-                    modelCtrl.Choose(foundIndex)
-                else
-                    modelCtrl.Choose(1)
 
-                ToolTip("Found " . models.Length . " models")
-                SetTimer () => ToolTip(), -2000
+                if foundIndex > 0 {
+                    modelCtrl.Choose(foundIndex)
+                } else if recommendedIndex > 0 {
+                    ; Auto-select recommended model for new users
+                    modelCtrl.Choose(recommendedIndex)
+                    ; Save the selection (without the ★ suffix)
+                    this.Config.Set("Provider_" . this.GetSectionName(providerName), "DefaultModel", recommendedModel)
+                    ToolTip("Auto-selected recommended model: " . recommendedModel)
+                    SetTimer () => ToolTip(), -3000
+                } else {
+                    modelCtrl.Choose(1)
+                }
+
+                if recommendedIndex = 0 || foundIndex > 0 {
+                    ToolTip("Found " . models.Length . " models")
+                    SetTimer () => ToolTip(), -2000
+                }
             } else {
                 ; No models found - leave dropdown empty
                 ToolTip("No models found")
@@ -469,15 +505,29 @@ class ProvidersTab {
     }
 
     /**
-     * Sort models with preferred ones first
+     * Sort models with recommended first, then preferred ones
+     * @param {Array} models - Array of model IDs
+     * @param {string} providerName - Provider name to look up recommended model
      */
-    static SortModels(models) {
-        ; Preferred order prefixes
-        preferred := ["gpt-4.1", "gpt-4o", "gpt-4-turbo", "gpt-4", "gpt-3.5", "claude-opus", "claude-sonnet", "gemini-2", "gemini-1"]
-        sorted := []
-        remaining := []
+    static SortModels(models, providerName := "") {
+        ; Get recommended model for this provider
+        recommendedModel := (providerName && this.RecommendedModels.Has(providerName)) ? this.RecommendedModels[providerName] : ""
 
-        ; First pass: add preferred models in order
+        ; Preferred order prefixes
+        preferred := ["gpt-4.1", "gpt-4o", "gpt-4-turbo", "gpt-4", "gpt-3.5", "claude-3-5-haiku", "claude-3-5-sonnet", "claude-3-opus", "gemini-2.5-flash", "gemini-2", "gemini-1"]
+        sorted := []
+
+        ; First: add recommended model if it exists
+        if recommendedModel {
+            for model in models {
+                if model = recommendedModel {
+                    sorted.Push(model)
+                    break
+                }
+            }
+        }
+
+        ; Second pass: add preferred models in order
         for prefix in preferred {
             for model in models {
                 if InStr(model, prefix) && !this.ArrayContains(sorted, model)
@@ -485,7 +535,7 @@ class ProvidersTab {
             }
         }
 
-        ; Second pass: add remaining models
+        ; Third pass: add remaining models
         for model in models {
             if !this.ArrayContains(sorted, model)
                 sorted.Push(model)
@@ -555,8 +605,11 @@ class ProvidersTab {
         if this.Controls.Has(providerName . "_model") {
             modelCtrl := this.Controls[providerName . "_model"]
             modelText := modelCtrl.Text
-            if modelText && !InStr(modelText, "(")  ; Don't save placeholder text
+            if modelText && !InStr(modelText, "(") {  ; Don't save placeholder text
+                ; Strip the " ★ Recommended" suffix if present
+                modelText := RegExReplace(modelText, " ★ Recommended$", "")
                 this.Config.Set(section, "DefaultModel", modelText)
+            }
         }
     }
 
