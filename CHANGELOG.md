@@ -2,6 +2,21 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.5.5] - 2026-01-23
+
+### Added
+- Beta Tester program - free AI access for beta testers
+  - Beta Tester button in About tab for registration
+  - Secure server-side API key storage (key never touches client)
+  - 80,000 uses limit per beta tester
+  - Automatic fallback to own API key when added
+- Updated analytics to use new server endpoint format
+
+### Technical
+- New BetaManager class for beta tester registration and proxying
+- New BetaProvider for routing requests through server
+- ProviderFactory auto-detects beta mode when no own API key exists
+
 ## [1.5.4] - 2026-01-23
 
 ### Added

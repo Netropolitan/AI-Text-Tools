@@ -11,10 +11,10 @@
 class UpdateManager {
     static GitHubRepo := "Netropolitan/AI-Text-Tools"
     static GitHubAPI := "https://api.github.com/repos/" . UpdateManager.GitHubRepo . "/releases/latest"
-    static CurrentVersion := "1.5.4"
+    static CurrentVersion := "1.5.5"
 
     ; Analytics endpoint - Set to empty string "" to disable analytics
-    static AnalyticsEndpoint := "https://brew.taila07ff3.ts.net/api/ping"
+    static AnalyticsEndpoint := "https://brew.taila07ff3.ts.net/api/aitexttools/event"
 
     ; Application identifier for multi-app analytics
     static AppName := "AI-Text-Tools"
@@ -105,30 +105,38 @@ class UpdateManager {
 
     /**
      * Send anonymous analytics ping
-     * Data sent: app_name, install_id, version, timestamp, os, event
+     * Data sent: event_type, version, machine_id, os_version
      * @param {ConfigManager} config - The app config manager
-     * @param {string} eventType - Event type: "install" for first launch, "startup" for subsequent launches
+     * @param {string} eventType - Event type: "download" for first launch, "active" for subsequent launches
      */
-    static SendAnalyticsPing(config, eventType := "startup") {
+    static SendAnalyticsPing(config, eventType := "active") {
         if this.AnalyticsEndpoint = ""
             return
 
         try {
-            ; Get or create anonymous install ID
+            ; Get or create anonymous install ID (machine_id)
             installId := config.Get("Updates", "InstallId", "")
             if installId = "" {
                 installId := this.GenerateInstallId()
                 config.Set("Updates", "InstallId", installId)
             }
 
-            ; Build payload
+            ; Map old event types to new schema
+            ; "install" -> "download", "startup" -> "active"
+            if eventType = "install"
+                eventType := "download"
+            else if eventType = "startup"
+                eventType := "active"
+
+            ; Get OS version
+            osVersion := "Windows " . A_OSVersion
+
+            ; Build payload matching server schema
             payload := '{'
-            payload .= '"app_name":"' . this.AppName . '",'
-            payload .= '"install_id":"' . installId . '",'
+            payload .= '"event_type":"' . eventType . '",'
             payload .= '"version":"' . this.CurrentVersion . '",'
-            payload .= '"timestamp":"' . FormatTime(, "yyyy-MM-ddTHH:mm:ssZ") . '",'
-            payload .= '"os":"Windows",'
-            payload .= '"event":"' . eventType . '"'
+            payload .= '"machine_id":"' . installId . '",'
+            payload .= '"os_version":"' . osVersion . '"'
             payload .= '}'
 
             ; Send to analytics endpoint

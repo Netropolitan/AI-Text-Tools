@@ -8,7 +8,7 @@
 class SettingsWindow {
     static Gui := ""
     static Tabs := ""
-    static CurrentVersion := "1.5.4"
+    static CurrentVersion := "1.5.5"
     static GitHubRepo := "https://github.com/Netropolitan/AI-Text-Tools"
 
     /**
@@ -202,7 +202,7 @@ class SettingsWindow {
         y += 25
 
         this.Gui.Add("Text", "x" x " y" y " w500 c666666", "AI Text Tools for Windows")
-        y += 30
+        y += 22
 
         ; Version section
         this.Gui.SetFont("Bold")
@@ -215,7 +215,7 @@ class SettingsWindow {
         updateBtn.OnEvent("Click", (*) => this.CheckForUpdates())
         uninstallBtn := this.Gui.Add("Button", "x" (x+210) " y" (y-4) " w80 h24", "Uninstall")
         uninstallBtn.OnEvent("Click", (*) => this.Uninstall())
-        y += 35
+        y += 28
 
         ; Netropolitan Academy section
         this.Gui.SetFont("Bold")
@@ -228,7 +228,7 @@ class SettingsWindow {
 
         netroLink := this.Gui.Add("Text", "x" x " y" y " c0066CC", "netropolitan.xyz")
         netroLink.OnEvent("Click", (*) => Run("https://netropolitan.xyz/"))
-        y += 35
+        y += 25
 
         ; Developer section
         this.Gui.SetFont("Bold")
@@ -248,7 +248,7 @@ class SettingsWindow {
 
         emailLink := this.Gui.Add("Text", "x" x " y" y " c0066CC", "jamie@bykovbrett.net")
         emailLink.OnEvent("Click", (*) => Run("mailto:jamie@bykovbrett.net"))
-        y += 30
+        y += 22
 
         ; License section
         this.Gui.SetFont("Bold")
@@ -267,6 +267,32 @@ class SettingsWindow {
 
         shareBtn := this.Gui.Add("Button", "x" (x + 150) " y" y " w140 h28", "Share on GitHub")
         shareBtn.OnEvent("Click", (*) => Run("https://github.com/Netropolitan/AI-Text-Tools"))
+
+        ; Beta Tester button (or status indicator)
+        if BetaManager.HasBetaAccess() {
+            usesRemaining := BetaManager.GetUsesRemaining()
+            betaStatus := this.Gui.Add("Text", "x" (x + 300) " y" (y + 6) " c00AA00", "Beta: " . usesRemaining . " credits")
+        } else {
+            betaBtn := this.Gui.Add("Button", "x" (x + 300) " y" y " w120 h28", "Beta Tester")
+            betaBtn.OnEvent("Click", (*) => this.OnBetaTesterClick())
+        }
+    }
+
+    /**
+     * Handle Beta Tester button click
+     */
+    static OnBetaTesterClick() {
+        ; Close settings to show registration popup cleanly
+        this.Close()
+
+        ; Show registration popup
+        if BetaManager.ShowRegistrationPopup() {
+            ; Registration successful - reopen settings to show status
+            this.Show()
+        } else {
+            ; Registration cancelled - reopen settings
+            this.Show()
+        }
     }
 
     /**

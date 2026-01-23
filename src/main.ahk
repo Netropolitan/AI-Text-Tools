@@ -7,7 +7,7 @@ DllCall("SetThreadDpiAwarenessContext", "ptr", -4, "ptr")
 ; Compiler directives for EXE
 ;@Ahk2Exe-SetName AI Text Tools
 ;@Ahk2Exe-SetDescription AI-powered text transformation
-;@Ahk2Exe-SetVersion 1.5.4
+;@Ahk2Exe-SetVersion 1.5.5
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
 ;@Ahk2Exe-SetCompanyName Bykov-Brett Enterprises
 
@@ -23,6 +23,7 @@ DllCall("SetThreadDpiAwarenessContext", "ptr", -4, "ptr")
 #Include core\credentials.ahk
 #Include core\orchestrator.ahk
 #Include core\updater.ahk
+#Include core\beta.ahk
 
 ; Providers
 #Include providers\base.ahk
@@ -30,6 +31,7 @@ DllCall("SetThreadDpiAwarenessContext", "ptr", -4, "ptr")
 #Include providers\ollama.ahk
 #Include providers\anthropic.ahk
 #Include providers\gemini.ahk
+#Include providers\beta.ahk
 #Include providers\factory.ahk
 
 ; UI
@@ -52,6 +54,9 @@ CustomPromptManager.Load(AppConfig)
 
 ; Initialize orchestrator
 Orchestrator.Initialize(AppConfig)
+
+; Initialize beta manager
+BetaManager.Init(AppConfig)
 
 ; Initialize hotkeys
 HotkeyManager.Initialize(OnQuickAction, OnPromptMenu, AppConfig)

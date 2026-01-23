@@ -74,23 +74,47 @@ class ProvidersTab {
         if options.hasApiKey {
             gui.Add("Text", "x" . x . " y" . y, "API Key:")
 
-            ; Check if key exists - show placeholder, not masked value
+            ; Check for beta access (OpenAI only)
+            isBetaActive := (providerName = "openai" && BetaManager.HasBetaAccess())
             hasKey := CredentialManager.Exists(providerName)
-            placeholder := hasKey ? "(key stored - enter new to replace)" : ""
-            keyEdit := gui.Add("Edit", "x" . (x+80) . " y" . (y-3) . " w300 Password", placeholder)
-            this.Controls[providerName . "_key"] := keyEdit
-            this.Controls[providerName . "_haskey"] := hasKey
 
-            ; Show/Hide toggle button
-            showBtn := gui.Add("Button", "x" . (x+390) . " y" . (y-4) . " w50 h24", "Show")
-            showBtn.OnEvent("Click", this.MakeToggleHandler(providerName))
-            this.Controls[providerName . "_showbtn"] := showBtn
-            this.Controls[providerName . "_keyvisible"] := false
+            if isBetaActive && !hasKey {
+                ; Show Beta Tester status instead of API key field
+                betaCredits := BetaManager.GetUsesRemaining()
+                if betaCredits > 0 {
+                    ; Green dot + Beta Tester text
+                    gui.Add("Text", "x" . (x+80) . " y" . y . " w16 c00AA00", Chr(0x25CF))
+                    gui.Add("Text", "x" . (x+98) . " y" . y . " w200 c00AA00", "Beta Tester (" . betaCredits . " credits)")
+                } else {
+                    ; Red dot + expired text
+                    gui.Add("Text", "x" . (x+80) . " y" . y . " w16 cCC0000", Chr(0x25CF))
+                    gui.Add("Text", "x" . (x+98) . " y" . y . " w200 cCC0000", "Beta credits exhausted")
+                    ; Clear beta access
+                    BetaManager.ClearBetaAccess()
+                }
+                ; Hidden edit for compatibility
+                keyEdit := gui.Add("Edit", "x" . (x+80) . " y" . (y-3) . " w0 h0 Hidden", "")
+                this.Controls[providerName . "_key"] := keyEdit
+                this.Controls[providerName . "_haskey"] := false
+                y += 30
+            } else {
+                ; Normal API key field
+                placeholder := hasKey ? "(key stored - enter new to replace)" : ""
+                keyEdit := gui.Add("Edit", "x" . (x+80) . " y" . (y-3) . " w300 Password", placeholder)
+                this.Controls[providerName . "_key"] := keyEdit
+                this.Controls[providerName . "_haskey"] := hasKey
 
-            ; Delete button
-            delBtn := gui.Add("Button", "x" . (x+445) . " y" . (y-4) . " w50 h24", "Delete")
-            delBtn.OnEvent("Click", this.MakeDeleteHandler(providerName))
-            y += 30
+                ; Show/Hide toggle button
+                showBtn := gui.Add("Button", "x" . (x+390) . " y" . (y-4) . " w50 h24", "Show")
+                showBtn.OnEvent("Click", this.MakeToggleHandler(providerName))
+                this.Controls[providerName . "_showbtn"] := showBtn
+                this.Controls[providerName . "_keyvisible"] := false
+
+                ; Delete button
+                delBtn := gui.Add("Button", "x" . (x+445) . " y" . (y-4) . " w50 h24", "Delete")
+                delBtn.OnEvent("Click", this.MakeDeleteHandler(providerName))
+                y += 30
+            }
         }
 
         ; URL field (for Ollama)
@@ -108,10 +132,19 @@ class ProvidersTab {
         section := "Provider_" . this.GetSectionName(providerName)
         currentModel := this.Config.Get(section, "DefaultModel", "")
 
-        ; Create dropdown with just the saved model (if any) or placeholder
-        initialModels := currentModel ? [currentModel] : ["(Test connection to load)"]
-        modelCtrl := gui.Add("DropDownList", "x" . (x+80) . " y" . (y-3) . " w300", initialModels)
-        modelCtrl.Choose(1)
+        ; Check for beta mode (OpenAI only)
+        isBetaActive := (providerName = "openai" && BetaManager.HasBetaAccess() && !CredentialManager.Exists(providerName))
+
+        if isBetaActive {
+            ; Beta mode - show fixed model
+            modelCtrl := gui.Add("DropDownList", "x" . (x+80) . " y" . (y-3) . " w300", ["gpt-4.1-nano (Beta)"])
+            modelCtrl.Choose(1)
+        } else {
+            ; Normal mode - regular model dropdown
+            initialModels := currentModel ? [currentModel] : ["(Test connection to load)"]
+            modelCtrl := gui.Add("DropDownList", "x" . (x+80) . " y" . (y-3) . " w300", initialModels)
+            modelCtrl.Choose(1)
+        }
         this.Controls[providerName . "_model"] := modelCtrl
         y += 30
 
@@ -163,6 +196,9 @@ class ProvidersTab {
      * Get status indicator color based on configuration
      */
     static GetStatusColor(providerName) {
+        ; Check for beta access (OpenAI only)
+        if providerName = "openai" && BetaManager.HasBetaAccess() && BetaManager.GetUsesRemaining() > 0
+            return "00AA00"  ; Green for active beta
         if ProviderFactory.IsConfigured(providerName, this.Config)
             return "00AA00"  ; Green
         return "CC0000"  ; Red

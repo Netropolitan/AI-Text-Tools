@@ -42,11 +42,22 @@ class ProviderFactory {
 
     /**
      * Create the default provider from config
+     * Checks for beta access if user doesn't have their own API key
      * @param config ConfigManager instance
      * @returns Provider instance
      */
     static CreateDefault(config) {
         defaultName := config.Get("General", "DefaultProvider", "openai")
+
+        ; Check if user should use beta mode:
+        ; 1. Has beta access (token exists)
+        ; 2. Default provider is OpenAI
+        ; 3. Does NOT have their own OpenAI API key
+        if defaultName = "openai" && BetaManager.HasBetaAccess() && !CredentialManager.Exists("openai") {
+            ; User has beta access but no own key - use beta provider
+            return BetaProvider(config, "Beta")
+        }
+
         return this.Create(defaultName, config)
     }
 
