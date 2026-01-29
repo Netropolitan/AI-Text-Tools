@@ -175,25 +175,35 @@ class PromptMenu {
 
     /**
      * Check mouse position and update hover states
+     * Uses Windows API ScreenToClient for accurate coordinate conversion
+     * that properly handles window borders and DPI scaling
      */
     static CheckHover() {
         if !this.Gui
             return
 
         try {
-            ; Get GUI position
-            this.Gui.GetPos(&winX, &winY, &winW, &winH)
-
             ; Get mouse position in screen coordinates
             CoordMode "Mouse", "Screen"
             MouseGetPos &mx, &my
 
-            ; Convert to client coordinates
-            clientX := mx - winX
-            clientY := my - winY
+            ; Convert screen coordinates to client coordinates using Windows API
+            ; This properly accounts for window borders and DPI scaling
+            pt := Buffer(8, 0)
+            NumPut("int", mx, pt, 0)
+            NumPut("int", my, pt, 4)
+            DllCall("ScreenToClient", "Ptr", this.Gui.Hwnd, "Ptr", pt)
+            clientX := NumGet(pt, 0, "int")
+            clientY := NumGet(pt, 4, "int")
 
-            ; Check if mouse is inside window
-            if (clientX < 0 || clientY < 0 || clientX > winW || clientY > winH) {
+            ; Get client area dimensions using Windows API
+            rect := Buffer(16, 0)
+            DllCall("GetClientRect", "Ptr", this.Gui.Hwnd, "Ptr", rect)
+            clientW := NumGet(rect, 8, "int")
+            clientH := NumGet(rect, 12, "int")
+
+            ; Check if mouse is inside client area
+            if (clientX < 0 || clientY < 0 || clientX > clientW || clientY > clientH) {
                 ; Mouse outside window - reset all
                 if this.LastHovered {
                     this.LastHovered.Opt("c000000 BackgroundFFFFFF")
@@ -584,21 +594,33 @@ class PromptMenu {
 
     /**
      * Check for clicks outside submenu
+     * Uses Windows API ScreenToClient for accurate coordinate conversion
      */
     static CheckSubmenuClick() {
         if !this.HasOwnProp("SubGui") || !this.SubGui
             return
 
         try {
-            this.SubGui.GetPos(&winX, &winY, &winW, &winH)
+            ; Get mouse position in screen coordinates
             CoordMode "Mouse", "Screen"
             MouseGetPos &mx, &my
 
-            clientX := mx - winX
-            clientY := my - winY
+            ; Convert screen coordinates to client coordinates using Windows API
+            pt := Buffer(8, 0)
+            NumPut("int", mx, pt, 0)
+            NumPut("int", my, pt, 4)
+            DllCall("ScreenToClient", "Ptr", this.SubGui.Hwnd, "Ptr", pt)
+            clientX := NumGet(pt, 0, "int")
+            clientY := NumGet(pt, 4, "int")
+
+            ; Get client area dimensions
+            rect := Buffer(16, 0)
+            DllCall("GetClientRect", "Ptr", this.SubGui.Hwnd, "Ptr", rect)
+            clientW := NumGet(rect, 8, "int")
+            clientH := NumGet(rect, 12, "int")
 
             ; If mouse outside and clicking, close submenu
-            if (clientX < 0 || clientY < 0 || clientX > winW || clientY > winH) {
+            if (clientX < 0 || clientY < 0 || clientX > clientW || clientY > clientH) {
                 if GetKeyState("LButton", "P") {
                     this.CloseSubmenuOnly()
                 }

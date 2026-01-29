@@ -2,6 +2,19 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.6.0] - 2026-01-29
+
+### Fixed
+- **Menu hover alignment issue** - Fixed parallax-like effect where menu highlight would drift from cursor position as you moved down the menu
+  - Root cause: Coordinate conversion using simple subtraction didn't account for window borders and DPI scaling
+  - Solution: Now uses Windows API `ScreenToClient` for accurate screen-to-client coordinate conversion
+  - Fix applied to both main prompt menu and provider submenu
+
+### Technical
+- `CheckHover()` now uses `DllCall("ScreenToClient")` instead of manual `mouseX - winX` subtraction
+- `CheckSubmenuClick()` updated with same fix
+- `GetClientRect` API used to get accurate client area dimensions
+
 ## [1.5.5] - 2026-01-23
 
 ### Added

@@ -92,6 +92,9 @@ class ProvidersTab {
                     ; Clear beta access
                     BetaManager.ClearBetaAccess()
                 }
+                ; Delete button to clear beta access
+                betaDelBtn := gui.Add("Button", "x" . (x+310) . " y" . (y-4) . " w50 h24", "Delete")
+                betaDelBtn.OnEvent("Click", (*) => this.DeleteBetaAccess())
                 ; Hidden edit for compatibility
                 keyEdit := gui.Add("Edit", "x" . (x+80) . " y" . (y-3) . " w0 h0 Hidden", "")
                 this.Controls[providerName . "_key"] := keyEdit
@@ -316,6 +319,21 @@ class ProvidersTab {
         ; Show confirmation
         ToolTip("Default provider: " . providerName)
         SetTimer () => ToolTip(), -2000
+    }
+
+    /**
+     * Delete beta access and refresh settings
+     */
+    static DeleteBetaAccess() {
+        result := MsgBox("Are you sure you want to remove your beta tester access?`n`nYou can re-register later if you have a valid code.", "Remove Beta Access", "YesNo Icon!")
+        if result = "Yes" {
+            BetaManager.ClearBetaAccess()
+            this.UpdateStatus("openai", false)
+            ToolTip("Beta access removed")
+            SetTimer () => ToolTip(), -2000
+            ; Inform user to reopen settings
+            MsgBox("Please close and reopen Settings to see the updated options.", "Settings Refresh Required", "Iconi")
+        }
     }
 
     /**
