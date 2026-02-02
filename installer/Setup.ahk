@@ -4,12 +4,12 @@
 ; Compiler directives
 ;@Ahk2Exe-SetName AI Text Tools Setup
 ;@Ahk2Exe-SetDescription AI Text Tools Installer
-;@Ahk2Exe-SetVersion 1.6.0
+;@Ahk2Exe-SetVersion 1.7.0
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
 
 ; GitHub repository for downloading update files
 global GitHubRepo := "Netropolitan/AI-Text-Tools"
-global CurrentInstallerVersion := "1.6.0"
+global CurrentInstallerVersion := "1.7.0"
 
 /**
  * Download file with proper redirect handling using WinHTTP

@@ -2,6 +2,27 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.7.0] - 2026-02-02
+
+### Security
+- **DPAPI encryption for API keys** - Credentials are now encrypted using Windows Data Protection API (DPAPI) instead of Base64 encoding
+  - DPAPI provides real cryptographic protection tied to the Windows user account
+  - Encrypted data can only be decrypted by the same user on the same machine
+  - Prevents casual viewing of API keys in the settings.ini file
+
+### Added
+- Automatic migration from legacy Base64 format (v1.6 and earlier)
+  - When retrieving a credential, the system first tries DPAPI decryption
+  - If DPAPI fails, it attempts Base64 decode (legacy format)
+  - Successfully decoded legacy credentials are automatically re-encrypted with DPAPI
+  - Seamless upgrade experience - no user action required
+
+### Technical
+- New `DPAPIEncrypt()` function using `CryptProtectData` Windows API
+- New `DPAPIDecrypt()` function using `CryptUnprotectData` Windows API
+- Legacy `Base64Decode()` retained for migration support only
+- `Base64Encode()` removed (no longer needed for new credentials)
+
 ## [1.6.0] - 2026-01-29
 
 ### Fixed
