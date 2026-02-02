@@ -13,7 +13,7 @@ After making changes to any `.ahk` source files, you must recompile the executab
 
 ### Compile All Executables
 
-Run these commands in PowerShell:
+Run these commands in PowerShell from the project root directory:
 
 ```powershell
 # Compile main application
@@ -23,17 +23,17 @@ Run these commands in PowerShell:
     /base 'C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe' `
     /icon 'assets\icon.ico'
 
-# Compile installer
+# Compile installer (named for GitHub releases)
 & 'C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe' `
     /in 'installer\Setup.ahk' `
-    /out 'installer\Setup.exe' `
+    /out 'AITextTools-Setup.exe' `
     /base 'C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe' `
     /icon 'assets\icon.ico'
 
 # Compile uninstaller
 & 'C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe' `
     /in 'installer\Uninstall.ahk' `
-    /out 'installer\Uninstall.exe' `
+    /out 'Uninstall.exe' `
     /base 'C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe' `
     /icon 'assets\icon.ico'
 ```
@@ -44,12 +44,14 @@ Run these commands in PowerShell:
 # Main app
 & 'C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe' /in 'src\main.ahk' /out 'AITextTools.exe' /base 'C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe' /icon 'assets\icon.ico'
 
-# Installer
-& 'C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe' /in 'installer\Setup.ahk' /out 'installer\Setup.exe' /base 'C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe' /icon 'assets\icon.ico'
+# Installer (MUST be named AITextTools-Setup.exe for auto-updater)
+& 'C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe' /in 'installer\Setup.ahk' /out 'AITextTools-Setup.exe' /base 'C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe' /icon 'assets\icon.ico'
 
 # Uninstaller
-& 'C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe' /in 'installer\Uninstall.ahk' /out 'installer\Uninstall.exe' /base 'C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe' /icon 'assets\icon.ico'
+& 'C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe' /in 'installer\Uninstall.ahk' /out 'Uninstall.exe' /base 'C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe' /icon 'assets\icon.ico'
 ```
+
+**Important:** The installer must be named `AITextTools-Setup.exe` because the auto-update system downloads this specific filename from GitHub releases.
 
 ## Version Number Locations
 
@@ -192,8 +194,22 @@ ai-text-tools-v1.7/
 │   └── icon.ico              # Application icon
 ├── CHANGELOG.md              # Version history
 ├── BUILDING.md               # This file
-└── AITextTools.exe           # Compiled application
+├── AITextTools.exe           # Compiled application
+├── AITextTools-Setup.exe     # Compiled installer (for GitHub releases)
+└── Uninstall.exe             # Compiled uninstaller (for GitHub releases)
 ```
+
+## GitHub Release Files
+
+When creating a new GitHub release, upload these three files:
+
+| File | Description |
+|------|-------------|
+| `AITextTools.exe` | Main application |
+| `AITextTools-Setup.exe` | Installer wizard |
+| `Uninstall.exe` | Uninstaller wizard |
+
+The auto-updater specifically looks for `AITextTools-Setup.exe` - using a different filename will break the update system.
 
 ## Common Tasks for AI Agents
 
@@ -239,18 +255,20 @@ ai-text-tools-v1.7/
 
 **CRITICAL: After updating version numbers, AI agents MUST recompile all executables.**
 
-Run these PowerShell commands to recompile:
+Run these PowerShell commands to recompile (from the project root directory):
 
 ```powershell
 # Compile main application
 & 'C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe' /in 'src\main.ahk' /out 'AITextTools.exe' /base 'C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe' /icon 'assets\icon.ico'
 
-# Compile installer
-& 'C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe' /in 'installer\Setup.ahk' /out 'installer\Setup.exe' /base 'C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe' /icon 'assets\icon.ico'
+# Compile installer (named AITextTools-Setup.exe for GitHub releases)
+& 'C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe' /in 'installer\Setup.ahk' /out 'AITextTools-Setup.exe' /base 'C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe' /icon 'assets\icon.ico'
 
 # Compile uninstaller
-& 'C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe' /in 'installer\Uninstall.ahk' /out 'installer\Uninstall.exe' /base 'C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe' /icon 'assets\icon.ico'
+& 'C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe' /in 'installer\Uninstall.ahk' /out 'Uninstall.exe' /base 'C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe' /icon 'assets\icon.ico'
 ```
+
+**Note:** The installer MUST be named `AITextTools-Setup.exe` (not `Setup.exe`) because the auto-updater downloads this filename from GitHub releases.
 
 **Verification:** After compiling, verify the version is correct:
 ```powershell
