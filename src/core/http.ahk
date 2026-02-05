@@ -31,12 +31,15 @@ class HttpClient {
 
         try {
             whr := ComObject("WinHttp.WinHttpRequest.5.1")
-            whr.Open(method, url, true)  ; true = async
 
-            ; Set timeout (resolve, connect, send, receive)
+            ; Set timeouts BEFORE Open for reliability
+            ; Parameters: ResolveTimeout, ConnectTimeout, SendTimeout, ReceiveTimeout (all in ms)
             whr.SetTimeouts(timeout, timeout, timeout, timeout)
 
-            ; Set custom headers first (allows overriding Content-Type)
+            ; Use synchronous mode for reliability (avoids 0x8000000A errors)
+            whr.Open(method, url, false)  ; false = synchronous
+
+            ; Set custom headers
             for name, value in headers
                 whr.SetRequestHeader(name, value)
 
@@ -53,11 +56,8 @@ class HttpClient {
                 }
             }
 
-            ; Send request
+            ; Send request (blocks until complete in sync mode)
             whr.Send(sendBody)
-
-            ; Wait for response
-            whr.WaitForResponse(timeout / 1000)  ; WaitForResponse uses seconds
 
             result.status := whr.Status
             result.body := whr.ResponseText

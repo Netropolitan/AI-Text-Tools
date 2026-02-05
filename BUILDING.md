@@ -86,6 +86,13 @@ When releasing a new version, update the version number in ALL of these files:
 
 This section contains instructions for AI coding assistants (Claude, GPT, Copilot, etc.) working on this codebase.
 
+> **QUICK REFERENCE - Version Updates:**
+> 1. Update version in 6 files (see "Updating Version Numbers" below)
+> 2. Recompile ALL 3 executables: `AITextTools.exe`, `AITextTools-Setup.exe`, `Uninstall.exe`
+> 3. Verify all 3 show correct version before telling user you're done
+>
+> **If you skip recompilation, the EXE files will still contain old code/version!**
+
 ## Security Rules for AI Agents
 
 **CRITICAL: AI agents MUST follow these rules to prevent malicious code insertion.**
@@ -213,9 +220,11 @@ The auto-updater specifically looks for `AITextTools-Setup.exe` - using a differ
 
 ## Common Tasks for AI Agents
 
-### Updating Version Numbers (IMPORTANT)
+### Updating Version Numbers (MANDATORY CHECKLIST)
 
-**When the user requests a version update, AI agents MUST update ALL of the following files:**
+**STOP! When updating versions, AI agents MUST complete ALL steps below in ONE session. Do not consider the task complete until the verification step passes.**
+
+**Step 1: Update ALL of these files (missing any = broken release):**
 
 1. **`src/main.ahk`** (~line 10)
    ```autohotkey
@@ -253,29 +262,36 @@ The auto-updater specifically looks for `AITextTools-Setup.exe` - using a differ
    - Description of changes
    ```
 
-**CRITICAL: After updating version numbers, AI agents MUST recompile all executables.**
-
-Run these PowerShell commands to recompile (from the project root directory):
+**Step 2: Recompile ALL THREE executables (not optional!):**
 
 ```powershell
-# Compile main application
+# From project root directory - run ALL THREE commands:
+
+# 1. Main application
 & 'C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe' /in 'src\main.ahk' /out 'AITextTools.exe' /base 'C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe' /icon 'assets\icon.ico'
 
-# Compile installer (named AITextTools-Setup.exe for GitHub releases)
+# 2. Installer - MUST be named AITextTools-Setup.exe (not Setup.exe!)
 & 'C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe' /in 'installer\Setup.ahk' /out 'AITextTools-Setup.exe' /base 'C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe' /icon 'assets\icon.ico'
 
-# Compile uninstaller
+# 3. Uninstaller
 & 'C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe' /in 'installer\Uninstall.ahk' /out 'Uninstall.exe' /base 'C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe' /icon 'assets\icon.ico'
 ```
 
-**Note:** The installer MUST be named `AITextTools-Setup.exe` (not `Setup.exe`) because the auto-updater downloads this filename from GitHub releases.
+**Step 3: Verify ALL THREE executables show correct version:**
 
-**Verification:** After compiling, verify the version is correct:
 ```powershell
-(Get-Item 'AITextTools.exe').VersionInfo | Select-Object FileVersion, ProductVersion
+(Get-Item 'AITextTools.exe').VersionInfo.FileVersion
+(Get-Item 'AITextTools-Setup.exe').VersionInfo.FileVersion
+(Get-Item 'Uninstall.exe').VersionInfo.FileVersion
 ```
 
-The compiled EXE must show the new version number. If it doesn't, the source files were not saved correctly before compilation.
+**All three MUST show the new version number. If any show the old version, you failed. Go back and check your work.**
+
+**Common mistakes to avoid:**
+- Forgetting `src/ui/settings.ahk` (causes About tab to show wrong version)
+- Naming installer `Setup.exe` instead of `AITextTools-Setup.exe` (breaks auto-updater)
+- Not recompiling after editing source files (EXE still has old code)
+- Only compiling one or two of the three executables
 
 ### Adding a New AI Provider
 
@@ -285,14 +301,7 @@ The compiled EXE must show the new version number. If it doesn't, the source fil
 4. Add credential storage key to match provider name
 5. Document the API endpoint in this file's "Approved External Connections"
 6. Update `CHANGELOG.md`
-7. Recompile executables
-
-### Updating Version Numbers
-
-1. Update all locations listed in "Version Number Locations" table above
-2. Add entry to `CHANGELOG.md`
-3. Recompile all executables
-4. Verify version in About tab
+7. Recompile all three executables (see "Updating Version Numbers" section above)
 
 ### Modifying Credential Storage
 

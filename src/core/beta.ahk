@@ -58,7 +58,8 @@ class BetaManager {
     static GetUsesRemaining() {
         if !this.Config
             return 0
-        return Integer(this.Config.Get("Beta", "UsesRemaining", "0"))
+        val := this.Config.Get("Beta", "UsesRemaining", "0")
+        return (val = "") ? 0 : Integer(val)
     }
 
     /**
@@ -87,34 +88,59 @@ class BetaManager {
             ; Parse response
             response := JSON.Load(whr.ResponseText)
 
-            if whr.Status = 200 && response.Has("success") && response["success"] {
-                ; Save beta credentials
-                this.Config.Set("Beta", "Token", response["beta_token"])
+            ; Extract token from response (server may use different field names)
+            ; Token value could be null from JSON, so check for both empty and non-string
+            token := ""
+            if response.Has("beta_token") && response["beta_token"] != "" && !IsObject(response["beta_token"])
+                token := String(response["beta_token"])
+            else if response.Has("token") && response["token"] != "" && !IsObject(response["token"])
+                token := String(response["token"])
+
+            if token != "" {
+                ; Got a valid token - save it and activate
+                this.Config.Set("Beta", "Token", token)
                 this.Config.Set("Beta", "Email", email)
-                this.Config.Set("Beta", "UsesRemaining", String(response["uses_remaining"]))
+
+                ; Get uses remaining - check response first, fall back to status endpoint
+                usesRemaining := 0
+                if response.Has("uses_remaining") && response["uses_remaining"] != "" && !IsObject(response["uses_remaining"]) {
+                    try usesRemaining := Integer(response["uses_remaining"])
+                }
+
+                if usesRemaining = 0 {
+                    ; Response didn't have valid uses_remaining, check status endpoint
+                    status := this.CheckStatus()
+                    if status.success
+                        usesRemaining := status.uses_remaining
+                }
+
+                this.Config.Set("Beta", "UsesRemaining", String(usesRemaining))
+
+                ; Refresh provider to switch to BetaProvider
+                try Orchestrator.RefreshProvider()
 
                 return {
                     success: true,
-                    message: "Beta access activated! You have 80,000 credits.",
-                    uses_remaining: response["uses_remaining"]
-                }
-            } else if whr.Status = 409 && response.Has("beta_token") {
-                ; Email already registered - return existing token
-                this.Config.Set("Beta", "Token", response["beta_token"])
-                this.Config.Set("Beta", "Email", email)
-
-                ; Fetch current status to get uses remaining
-                status := this.CheckStatus()
-                if status.success {
-                    this.Config.Set("Beta", "UsesRemaining", String(status.uses_remaining))
-                }
-
-                return {
-                    success: true,
-                    message: "Welcome back! Your beta access is still active with " . (status.success ? status.uses_remaining : "80,000") . " credits remaining.",
-                    uses_remaining: status.success ? status.uses_remaining : 0
+                    message: "Beta access activated! You have " . usesRemaining . " credits.",
+                    uses_remaining: usesRemaining
                 }
             } else {
+                ; No token in response - check if we have one stored locally
+                existingToken := this.GetToken()
+                if existingToken != "" {
+                    this.Config.Set("Beta", "Email", email)
+                    status := this.CheckStatus()
+                    if status.success {
+                        this.Config.Set("Beta", "UsesRemaining", String(status.uses_remaining))
+                        try Orchestrator.RefreshProvider()
+                        return {
+                            success: true,
+                            message: "Beta access activated! You have " . status.uses_remaining . " credits.",
+                            uses_remaining: status.uses_remaining
+                        }
+                    }
+                }
+                ; Genuine error - no token anywhere
                 errorMsg := response.Has("error") ? response["error"] : "Registration failed"
                 return {success: false, message: errorMsg, uses_remaining: 0}
             }
@@ -335,9 +361,9 @@ class BetaManager {
         regResult := this.Register(code, email)
 
         if regResult.success {
-            MsgBox(regResult.message, "Beta Access Activated", "Iconi")
             result := true
             popup.Destroy()
+            MsgBox(regResult.message, "Beta Access Activated", "Iconi")
         } else {
             statusText.Value := regResult.message
         }

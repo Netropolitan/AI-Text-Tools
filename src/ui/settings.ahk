@@ -8,7 +8,7 @@
 class SettingsWindow {
     static Gui := ""
     static Tabs := ""
-    static CurrentVersion := "1.7.0"
+    static CurrentVersion := "1.7.1"
     static GitHubRepo := "https://github.com/Netropolitan/AI-Text-Tools"
 
     /**

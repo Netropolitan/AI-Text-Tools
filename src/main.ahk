@@ -7,7 +7,7 @@ DllCall("SetThreadDpiAwarenessContext", "ptr", -4, "ptr")
 ; Compiler directives for EXE
 ;@Ahk2Exe-SetName AI Text Tools
 ;@Ahk2Exe-SetDescription AI-powered text transformation
-;@Ahk2Exe-SetVersion 1.7.0
+;@Ahk2Exe-SetVersion 1.7.1
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
 ;@Ahk2Exe-SetCompanyName Bykov-Brett Enterprises
 
@@ -52,11 +52,11 @@ ThemeManager.Load(AppConfig)
 ; Initialize custom prompts (must be before PromptMenu uses them)
 CustomPromptManager.Load(AppConfig)
 
+; Initialize beta manager (must be before Orchestrator so it can detect beta access)
+BetaManager.Init(AppConfig)
+
 ; Initialize orchestrator
 Orchestrator.Initialize(AppConfig)
-
-; Initialize beta manager
-BetaManager.Init(AppConfig)
 
 ; Initialize hotkeys
 HotkeyManager.Initialize(OnQuickAction, OnPromptMenu, AppConfig)
@@ -153,12 +153,12 @@ AutoConnectProvider() {
             ; Silent fail
         }
     } else {
-        ; For cloud providers, check if API key exists
-        if CredentialManager.Exists(defaultProvider) {
-            ; Credentials exist, refresh provider
+        ; For cloud providers, check if API key exists or has beta access
+        if CredentialManager.Exists(defaultProvider) || (defaultProvider = "openai" && BetaManager.HasBetaAccess()) {
+            ; Credentials or beta access exist, refresh provider
             Orchestrator.RefreshProvider()
         }
-        ; If no credentials, just stay disconnected - user can configure in settings
+        ; If no credentials and no beta access, stay disconnected - user can configure in settings
     }
 }
 

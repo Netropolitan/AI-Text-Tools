@@ -2,6 +2,25 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.7.1] - 2026-02-05
+
+### Fixed
+- **Beta tester access broken after DPAPI security update** - Beta testers could not use the app because `BetaManager` was initialised after the Orchestrator, so beta access was never detected at startup
+  - Moved `BetaManager.Init()` before `Orchestrator.Initialize()` so the provider factory can detect beta tokens
+  - Added beta access check to `AutoConnectProvider()` so beta testers get their provider refreshed on startup
+- **Beta re-registration now resumes existing session** - Activating with an already-registered email now behaves identically to a fresh registration: shows the same activation message, restores remaining credits, and immediately switches to the beta provider
+- **Beta registration handles server response variations** - Token extraction now works regardless of server `success` flag; handles null `uses_remaining` by querying status endpoint
+- **Fixed crash when UsesRemaining is empty** - `Integer()` call in `GetUsesRemaining()` now handles empty strings gracefully
+- **Beta registration popup closes before confirmation** - Popup now destroys before showing success message for cleaner UX
+
+### Improved
+- **Ollama provider rewritten for reliability** - Now uses `curl.exe` (built into Windows 10 1803+) for long-running LLM requests
+  - Eliminates `0x8000000A` "data not yet available" errors with WinHTTP async mode
+  - Falls back to WinHTTP sync mode if curl is unavailable
+  - Supports 5-minute timeout for slow model inference
+  - Uses UTF-8-RAW encoding to avoid BOM issues with JSON
+- **HTTP client switched to synchronous mode** - More reliable than async for AI API calls; timeouts now set before `Open()` for proper effect
+
 ## [1.7.0] - 2026-02-02
 
 ### Security
