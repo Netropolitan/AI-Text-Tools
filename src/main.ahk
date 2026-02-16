@@ -33,13 +33,6 @@ DllCall("SetThreadDpiAwarenessContext", "ptr", -4, "ptr")
 #Include providers\gemini.ahk
 #Include providers\beta.ahk
 #Include providers\factory.ahk
-#Include providers\stt-whisper.ahk
-#Include providers\stt-whisper-local.ahk
-#Include providers\tts-server.ahk
-#Include providers\tts-edge.ahk
-#Include providers\tts-piper.ahk
-#Include providers\stt-factory.ahk
-#Include providers\tts-factory.ahk
 
 ; UI
 #Include ui\popup.ahk
@@ -48,7 +41,6 @@ DllCall("SetThreadDpiAwarenessContext", "ptr", -4, "ptr")
 #Include ui\theme.ahk
 #Include ui\settings-providers.ahk
 #Include ui\settings-prompts.ahk
-#Include ui\settings-voice.ahk
 #Include ui\settings.ahk
 
 ; Application initialization
