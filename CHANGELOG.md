@@ -2,6 +2,11 @@
 
 All notable changes to AI Text Tools will be documented in this file.
 
+## [1.7.2] - 2026-02-16
+
+### Fixed
+- **Reasoning model think tags appearing in output** - Local models (DeepSeek R1, Qwen QwQ, etc.) that use `<think>...</think>` chain-of-thought tags now have these stripped automatically from all provider responses
+
 ## [1.7.1] - 2026-02-05
 
 ### Fixed

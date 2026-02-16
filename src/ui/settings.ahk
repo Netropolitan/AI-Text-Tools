@@ -2,13 +2,13 @@
  * SettingsWindow - Main settings GUI
  *
  * Provides tabbed interface for application settings.
- * Tabs: General, Providers, Local, Prompts, About, Disclaimer
+ * Tabs: General, Models, Local, Voice, Prompts, About, Disclaimer
  */
 
 class SettingsWindow {
     static Gui := ""
     static Tabs := ""
-    static CurrentVersion := "1.7.1"
+    static CurrentVersion := "1.7.2"
     static GitHubRepo := "https://github.com/Netropolitan/AI-Text-Tools"
 
     /**
@@ -36,7 +36,7 @@ class SettingsWindow {
         ThemeManager.Apply(this.Gui)
 
         ; Tab control
-        this.Tabs := this.Gui.Add("Tab3", "w550 h450", ["General", "Models", "Local", "Prompts", "About", "Disclaimer"])
+        this.Tabs := this.Gui.Add("Tab3", "w550 h450", ["General", "Models", "Local", "Voice", "Prompts", "About", "Disclaimer"])
 
         ; General tab - basic settings
         this.Tabs.UseTab("General")
@@ -49,6 +49,10 @@ class SettingsWindow {
         ; Local tab - Ollama/local models
         this.Tabs.UseTab("Local")
         LocalTab.Build(this.Gui, AppConfig)
+
+        ; Voice tab - TTS configuration
+        this.Tabs.UseTab("Voice")
+        VoiceTab.Build(this.Gui, AppConfig)
 
         ; Prompts tab
         this.Tabs.UseTab("Prompts")
@@ -369,6 +373,8 @@ c) Text you process is sent to your chosen AI provider (OpenAI, Anthropic, Googl
 d) Each AI provider has their own privacy policy and terms of service
 e) Anonymous usage analytics may be collected (can be disabled in Settings)
 f) We do not store, access, or have visibility into the content you process
+g) Speech-to-text using Whisper (Built-in) is processed entirely on your device
+h) Edge TTS sends text to Microsoft's servers for speech synthesis (requires internet)
 
 5. ACCEPTABLE USE
 You agree NOT to use this Software to:
@@ -536,6 +542,9 @@ By using this Software, you acknowledge that you have read, understood, and agre
 
         ; Save local/Ollama settings
         LocalTab.SaveAll()
+
+        ; Save STT/TTS settings
+        VoiceTab.SaveAll()
 
         ; Save custom prompts (already saved on individual changes, but ensure)
         CustomPromptManager.Save(AppConfig)

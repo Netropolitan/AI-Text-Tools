@@ -4,12 +4,12 @@
 ; Compiler directives
 ;@Ahk2Exe-SetName AI Text Tools Setup
 ;@Ahk2Exe-SetDescription AI Text Tools Installer
-;@Ahk2Exe-SetVersion 1.7.1
+;@Ahk2Exe-SetVersion 1.7.2
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
 
 ; GitHub repository for downloading update files
 global GitHubRepo := "Netropolitan/AI-Text-Tools"
-global CurrentInstallerVersion := "1.7.1"
+global CurrentInstallerVersion := "1.7.2"
 
 /**
  * Download file with proper redirect handling using WinHTTP
@@ -232,6 +232,16 @@ RunUpgrade() {
             FileCopy(SourceDir "\assets\icon.ico", InstallPath "\icon.ico", true)
         } else if FileExist(SourceDir "\icon.ico") {
             FileCopy(SourceDir "\icon.ico", InstallPath "\icon.ico", true)
+        }
+
+        ; Copy bin/ directory (whisper-cli.exe + models) if exists
+        if DirExist(SourceDir "\bin") {
+            statusText.Value := "Copying speech engine files..."
+            if !DirExist(InstallPath "\bin")
+                DirCreate(InstallPath "\bin")
+            Loop Files SourceDir "\bin\*.*" {
+                FileCopy(A_LoopFileFullPath, InstallPath "\bin\" . A_LoopFileName, true)
+            }
         }
 
         progressBar.Value := 80
@@ -698,6 +708,16 @@ StartInstallation() {
             FileCopy(SourceDir "\icon.ico", InstallPath "\icon.ico", true)
         } else if FileExist(SourceDir "\assets\icon.ico") {
             FileCopy(SourceDir "\assets\icon.ico", InstallPath "\icon.ico", true)
+        }
+
+        ; Copy bin/ directory (whisper-cli.exe + models) if exists
+        if DirExist(SourceDir "\bin") {
+            ProgressText.Value := "Copying speech engine files..."
+            if !DirExist(InstallPath "\bin")
+                DirCreate(InstallPath "\bin")
+            Loop Files SourceDir "\bin\*.*" {
+                FileCopy(A_LoopFileFullPath, InstallPath "\bin\" . A_LoopFileName, true)
+            }
         }
 
         ; Copy uninstaller

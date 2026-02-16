@@ -78,11 +78,27 @@ class ProviderBase {
      * Build standard result object
      */
     BuildResult(success, content := "", error := "", usage := "") {
+        ; Strip <think>...</think> blocks from reasoning models (e.g., DeepSeek R1, Qwen QwQ)
+        if success && content != ""
+            content := this.StripThinkTags(content)
+
         return {
             success: success,
             content: content,
             error: error,
             usage: usage ? usage : {prompt_tokens: 0, completion_tokens: 0}
         }
+    }
+
+    /**
+     * Strip <think>...</think> reasoning blocks from model output
+     * Many local models (DeepSeek, Qwen, etc.) emit chain-of-thought in these tags
+     */
+    StripThinkTags(text) {
+        ; Remove complete <think>...</think> blocks (dotall: . matches newlines)
+        text := RegExReplace(text, "s)<think>.*?</think>\s*", "")
+        ; Handle unclosed <think> tag (truncated reasoning) - strip from <think> to end
+        text := RegExReplace(text, "s)<think>.*$", "")
+        return Trim(text)
     }
 }

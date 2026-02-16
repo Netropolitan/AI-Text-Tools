@@ -1,4 +1,4 @@
-$base = 'C:\Users\HP ZBook\Documents\AutoHotkey\ai-text-tools-v1.5'
+$base = 'C:\Users\HP ZBook\Documents\AutoHotkey\ai-text-tools-v1.7'
 $compiler = 'C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe'
 $ahkBase = 'C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe'
 

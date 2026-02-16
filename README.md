@@ -7,6 +7,8 @@ AI-powered text transformation for Windows using hotkeys. Select text anywhere, 
 ## Features
 
 - **Multiple AI Providers**: OpenAI, Anthropic Claude, Google Gemini, and local Ollama
+- **Speech-to-Text**: Built-in Whisper (offline, powered by whisper.cpp) or Windows Speech Recognition
+- **Text-to-Speech**: Edge TTS (free neural voices), Windows SAPI, Piper (offline), or custom TTS server
 - **UK/US English Spelling**: Toggle between British and American English spelling in output
 - **Customizable Hotkeys**: Default Ctrl+Shift+J for quick action, Ctrl+Shift+K for prompt menu
 - **Custom Prompts**: Create and manage your own prompts
@@ -132,13 +134,32 @@ For everyday text tasks, these models offer the best balance of speed, quality, 
 
 These lightweight models are ideal for grammar fixes, rewrites, and quick text improvements. You can always switch to more powerful models for complex tasks.
 
+## Speech Engines
+
+### Speech-to-Text (STT)
+
+| Engine | Offline | Setup |
+|--------|---------|-------|
+| Whisper (Built-in) | Yes | Run `scripts\download-deps.ps1` to download whisper-cli.exe + model |
+| Windows Speech Recognition | Yes | Built into Windows, no setup needed |
+| Whisper Server (Advanced) | No | Requires a Whisper-compatible server |
+
+### Text-to-Speech (TTS)
+
+| Engine | Offline | Setup |
+|--------|---------|-------|
+| Edge TTS (Natural Voices) | No | Free, no API key, requires internet |
+| Windows SAPI | Yes | Built into Windows |
+| Piper (Offline) | Yes | Download from Settings > Voice |
+| TTS Server (Advanced) | No | Requires a TTS server |
+
 ## Requirements
 
 - Windows 10 or later
-- Internet connection (for cloud providers)
-- [Ollama](https://ollama.ai) (optional, for local models)
+- Internet connection (for cloud AI providers and Edge TTS)
+- [Ollama](https://ollama.ai) (optional, for local AI models)
 
-**Note:** No additional software is required. The application is fully standalone.
+**Note:** No additional software is required. The application is fully standalone. Speech-to-text with Whisper (Built-in) works completely offline after downloading the model files.
 
 ## For Developers
 
@@ -156,6 +177,9 @@ scripts\build-all.bat
 - [ecornell/ai-tools-ahk](https://github.com/ecornell/ai-tools-ahk) - Original AHK AI tools inspiration
 - [Serenity](https://autohotkey.com/board/topic/32608-changing-the-system-cursor/) - System cursor modification
 - [iseahound](https://github.com/iseahound/SetSystemCursor) - SetSystemCursor implementation
+- [whisper.cpp](https://github.com/ggml-org/whisper.cpp) by Georgi Gerganov - Local speech-to-text (MIT License)
+- [Piper](https://github.com/rhasspy/piper) by Rhasspy - Offline neural text-to-speech (MIT License)
+- Edge TTS - Microsoft Edge Read Aloud speech synthesis
 
 ## License
 

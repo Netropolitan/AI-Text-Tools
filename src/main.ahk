@@ -7,7 +7,7 @@ DllCall("SetThreadDpiAwarenessContext", "ptr", -4, "ptr")
 ; Compiler directives for EXE
 ;@Ahk2Exe-SetName AI Text Tools
 ;@Ahk2Exe-SetDescription AI-powered text transformation
-;@Ahk2Exe-SetVersion 1.7.1
+;@Ahk2Exe-SetVersion 1.7.2
 ;@Ahk2Exe-SetCopyright Copyright (c) 2026 Jamie Bykov-Brett
 ;@Ahk2Exe-SetCompanyName Bykov-Brett Enterprises
 
@@ -33,6 +33,13 @@ DllCall("SetThreadDpiAwarenessContext", "ptr", -4, "ptr")
 #Include providers\gemini.ahk
 #Include providers\beta.ahk
 #Include providers\factory.ahk
+#Include providers\stt-whisper.ahk
+#Include providers\stt-whisper-local.ahk
+#Include providers\tts-server.ahk
+#Include providers\tts-edge.ahk
+#Include providers\tts-piper.ahk
+#Include providers\stt-factory.ahk
+#Include providers\tts-factory.ahk
 
 ; UI
 #Include ui\popup.ahk
@@ -41,6 +48,7 @@ DllCall("SetThreadDpiAwarenessContext", "ptr", -4, "ptr")
 #Include ui\theme.ahk
 #Include ui\settings-providers.ahk
 #Include ui\settings-prompts.ahk
+#Include ui\settings-voice.ahk
 #Include ui\settings.ahk
 
 ; Application initialization
